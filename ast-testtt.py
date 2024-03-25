@@ -35,8 +35,8 @@ class FrameLevelLogisticModel(models.BaseModel):
 
 tree1 = ast.parse(code1)
 tree2 = ast.parse(code2)
-"""
-for node in ast.walk(tree): #traverses through the tree
+
+for node in ast.walk(tree2): #traverses through the tree
     if isinstance(node, ast.Call): #checks if the node is a function call
         if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) and node.func.value.id == 'cv2':
             if node.func.attr == 'cvtColor':
@@ -66,3 +66,4 @@ def find_regularizer_differences(node1, node2, lineno=1):
             find_regularizer_differences(child_node1, child_node2, lineno)
 
 find_regularizer_differences(tree1, tree2)
+"""
