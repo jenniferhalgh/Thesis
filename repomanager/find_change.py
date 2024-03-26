@@ -43,7 +43,7 @@ def addThem(num):
 """
 
 code2 = """
-def what(x, y):
+def what(x, y, z):
     a = x + y
     a = a + 1
     return a
@@ -60,7 +60,7 @@ add_node(old_ast)
 dot.format = 'png'
 dot.render('old_ast', view=True)
 
-model_functions = ["fully_connected", "Dense", "what" ]
+model_functions = ["fully_connected", "Dense" ]
 
 """
 print(ast.dump(ast.parse('a = 1'), indent=4))
@@ -96,46 +96,46 @@ def findConstant(node):
         if isinstance(child, ast.Constant):
             return child.value
 
-def findparam(node, call_funcs):
+def findparam(call_funcs):
     constants = []
     variables = []
     for call_func in call_funcs:
-        #print(f"call: {call_func}")
-        if hasattr(call_func, 'args'):
-            for arg in call_func.args:
+        if hasattr(call_func["node"], 'args'):
+            for arg in call_func["node"].args:
                 if isinstance(arg, ast.Name):
                     obj = {"Name": arg.id}
                     variables.append({"Name": arg.id})
-        if hasattr(call_func, 'keywords'):
-            for keyword in call_func.keywords:
-                constant = findConstant(keyword)
-                #value = find
-                obj = {"keyword": keyword.arg, "value": constant}
-                #print(obj)
-                constants.append(obj)
+                if isinstance(arg, ast.Constant):
+                    constants.append({"Name": call_func["name"], "value": arg.value})
+        if hasattr(call_func["node"], 'keywords'):
+            for keyword in call_func["node"].keywords:
+                if isinstance(keyword.value, ast.Call):
+                    if isinstance(keyword.value.func, ast.Attribute):
+                        func_name = keyword.value.func.attr
+                    elif isinstance(keyword.value.func, ast.Name):
+                        func_name = keyword.value.func.id
+                    constants.append({"Name": keyword.arg, "value": func_name})
     return constants, variables
 
-def find_funcs(ast1, functions):
+#Find all call functions
+def find_funcs(ast_tree):
     funcs = []
-    for node in ast.walk(ast1):
+    for node in ast.walk(ast_tree):
         if isinstance(node, ast.Call):
             if isinstance(node.func, ast.Attribute):
                 func_name = node.func.attr
             elif isinstance(node.func, ast.Name):
-                func_name = node.func.id
-            
-            for func in functions:
-                if func_name == func:
-                    funcs.append(node)
+                func_name = node.func.id      
+            funcs.append({"name": func_name, "node": node})                 
     return funcs
 
 
-call_functions = find_funcs(ast1, model_functions)
-constants, variables = findparam(ast1, call_functions)
+call_functions = find_funcs(ast1)
+constants, variables = findparam(call_functions)
 vars = findAllValues(variables, ast1)
 
-call_functions2 = find_funcs(ast2, model_functions)
-constants2, variables2 = findparam(ast2, call_functions2)
+call_functions2 = find_funcs(ast2)
+constants2, variables2 = findparam(call_functions2)
 vars2 = findAllValues(variables2, ast2)
 
 """
@@ -148,15 +148,15 @@ for var in variables:
 
 print(f'\nold')
 for params in vars:
-    print(f'paramval: {params}')
+    print(f'{params}')
 for cons in constants:
-    print(f'constants: {cons}')
+    print(f'{cons}')
 
 print(f'\nnew')
 for params2 in vars2:
-    print(f'paramval2: {params2}')
+    print(f'{params2}')
 for cons2 in constants2:
-    print(f'constants: {cons2}')
+    print(f'{cons2}')
 
 
 
