@@ -28,7 +28,7 @@ def clone_repo(github_link):
         return None
     """
     git_url = f'https://github.com/{username}/{repo_name}.git'
-    repo_path = os.path.abspath(f"./Repos/{repo_name}")
+    repo_path = os.path.abspath(f"./Repos/{username}/{repo_name}")
     if path.exists(repo_path):
         print("Repo Already Cloned.")
         return repo_path, commit_hash

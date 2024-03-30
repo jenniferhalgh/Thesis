@@ -97,16 +97,20 @@ def findConstant(node):
             return child.value
 
 def findparam(call_funcs):
+    
     constants = []
     variables = []
+    everything = []
     for call_func in call_funcs:
+        params = []
         if hasattr(call_func["node"], 'args'):
+            
             for arg in call_func["node"].args:
                 if isinstance(arg, ast.Name):
-                    obj = {"Name": arg.id}
                     variables.append({"Name": arg.id})
                 if isinstance(arg, ast.Constant):
                     constants.append({"Name": call_func["name"], "value": arg.value})
+                    params.append({"value": arg.value})
         if hasattr(call_func["node"], 'keywords'):
             for keyword in call_func["node"].keywords:
                 if isinstance(keyword.value, ast.Call):
@@ -114,8 +118,14 @@ def findparam(call_funcs):
                         func_name = keyword.value.func.attr
                     elif isinstance(keyword.value.func, ast.Name):
                         func_name = keyword.value.func.id
+                    params.append({"Name": keyword.arg, "value": func_name})
                     constants.append({"Name": keyword.arg, "value": func_name})
-    return constants, variables
+                if isinstance(keyword.value, ast.Name):
+                    params.append({"Name": keyword.arg, "value": keyword.value.id})
+                    constants.append({"Name": keyword.arg, "value": keyword.value.id})
+        
+        everything.append({"function": call_func["name"], "params": params})
+    return constants, variables, everything
 
 #Find all call functions
 def find_funcs(ast_tree):
@@ -129,13 +139,24 @@ def find_funcs(ast_tree):
             funcs.append({"name": func_name, "node": node})                 
     return funcs
 
+def compare(constants1, constants2):
+    amount = len(constants1)
+    count = 0
+    for i in range(amount):
+        if constants1[i]["Name"] == constants2[i]["Name"] and constants1[i]["value"] == constants2[i]["value"]:
+            count = count + 1
+        else:
+            print(f"1: {constants1[i]} 2: {constants2[i]}")
+
+    if amount != count:
+        print("Parameter tuning")
 
 call_functions = find_funcs(ast1)
-constants, variables = findparam(call_functions)
+constants, variables, everything = findparam(call_functions)
 vars = findAllValues(variables, ast1)
 
 call_functions2 = find_funcs(ast2)
-constants2, variables2 = findparam(call_functions2)
+constants2, variables2, everything2 = findparam(call_functions2)
 vars2 = findAllValues(variables2, ast2)
 
 """
@@ -157,6 +178,14 @@ for params2 in vars2:
     print(f'{params2}')
 for cons2 in constants2:
     print(f'{cons2}')
+
+"""
+for ever in everything:
+    print(f'{ever}')
+"""
+compare(constants, constants2)
+
+
 
 
 
