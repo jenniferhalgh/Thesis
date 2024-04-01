@@ -78,6 +78,34 @@ def compareParams(vars1, vars2):
         for new in vars2:
 """
 
+def find_constant_values(tree):
+    constants = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+            constants.append(node)
+
+    vals = []
+    for cons in constants:
+        parent = get_parent(cons)
+        
+        if isinstance(parent, ast.keyword):
+            vals.append({"name": keyword.arg, "value": cons.value})
+        elif isinstance(parent, ast.Call):
+            if isinstance(parent.func, ast.Attribute):
+                func_name = parent.func.attr
+            elif isinstance(keyword.value.func, ast.Name):
+                func_name = parent.func.id
+            vals.append({"name": func_name, "value": cons.value})
+    return vals
+
+def get_parent(node):
+        for parent in ast.walk(node):
+            for child in ast.iter_child_nodes(parent):
+                if child == node:
+                    print("hello?")
+                    return parent
+        return None
+
 def findAllValues(variables, ast1):
     params = []
     for var in variables:
@@ -109,10 +137,14 @@ def findparam(call_funcs):
                 if isinstance(arg, ast.Name):
                     variables.append({"Name": arg.id})
                 if isinstance(arg, ast.Constant):
-                    constants.append({"Name": call_func["name"], "value": arg.value})
-                    params.append({"value": arg.value})
+                    if isinstance(arg.value, (int, float)):
+                        constants.append({"Name": call_func["name"], "value": arg.value})
+                        params.append({"value": arg.value})
         if hasattr(call_func["node"], 'keywords'):
             for keyword in call_func["node"].keywords:
+                if isinstance(keyword.value, ast.Constant):
+                    params.append({"Name": keyword.arg, "value": keyword.value.value})
+                    constants.append({"Name": keyword.arg, "value": keyword.value.value})
                 if isinstance(keyword.value, ast.Call):
                     if isinstance(keyword.value.func, ast.Attribute):
                         func_name = keyword.value.func.attr
@@ -159,23 +191,15 @@ call_functions2 = find_funcs(ast2)
 constants2, variables2, everything2 = findparam(call_functions2)
 vars2 = findAllValues(variables2, ast2)
 
-"""
-for element in parameters:
-    print(element)
-
-for var in variables:
-    print(f'var: {var}')
-"""
-
 print(f'\nold')
-for params in vars:
-    print(f'{params}')
+#for params in vars:
+#    print(f'{params}')
 for cons in constants:
     print(f'{cons}')
 
 print(f'\nnew')
-for params2 in vars2:
-    print(f'{params2}')
+#for params2 in vars2:
+#    print(f'{params2}')
 for cons2 in constants2:
     print(f'{cons2}')
 
@@ -185,8 +209,13 @@ for ever in everything:
 """
 compare(constants, constants2)
 
+def find_all_constant_values(tree):
+    return find_constant_values(tree)
 
-
+print("\nhello: ")
+helps = find_all_constant_values(ast1)
+for help in helps:
+    print(help)
 
 
 
