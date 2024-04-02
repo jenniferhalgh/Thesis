@@ -9,10 +9,11 @@ def commit_changes(repo_path, commit_hash=None):
     repo = Repo(repo_path)
     if commit_hash:
         commit = repo.commit(commit_hash)
-    
+    df = pd.DataFrame()
     for item in commit.diff(commit.parents[0]).iter_change_type('M'):
         print("hello")
         path = item.a_path
+        
         if path.endswith('.py'):
             old_file_content = ast.dump(ast.parse(repo.git.show(f'{commit.parents[0]}:{path}')))
             current_file_content = ast.dump(ast.parse(repo.git.show(f'{commit.hexsha}:{path}')))
