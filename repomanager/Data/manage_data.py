@@ -39,7 +39,7 @@ def fix_url(downstream):
 
 
 #choose category here
-category = "preprocessing"
+category = "output data"
 extract_data("upstream", category)
 extract_data("downstream", category)
 

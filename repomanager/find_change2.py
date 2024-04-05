@@ -1,5 +1,6 @@
 import ast
 from ast import *
+import difflib
 import pandas as pd
 from ast_test import GlobalUseCollector
 from graphviz import Digraph
@@ -62,14 +63,15 @@ def findparam(call_funcs):
     return constants, variables, everything
 
 def find_assignments(ast_tree):
-    assignments = []
+    assignments = pd.DataFrame(columns=['name','value'])
     for node in ast.walk(ast_tree):
         if isinstance(node, ast.Assign):
             if hasattr(node, "value"):
                 if isinstance(node.value, ast.Constant):
                     for target in node.targets:
                         if isinstance(target, ast.Name):
-                            assignments.append({"Name": target.id, "value": node.value.value})
+                            new_row = {'name': target.id, 'value': str(node.value.value)}
+                            assignments.loc[len(assignments)] = new_row
     return assignments
 
 #Find all call functions
@@ -86,8 +88,7 @@ def find_funcs(ast_tree):
 
 def find_def(ast_tree):
     
-    defss = []
-    
+    defss = pd.DataFrame(columns=['name','args','constants'])
     for node in ast.walk(ast_tree):
         if isinstance(node, ast.FunctionDef):
             cons = []
@@ -100,9 +101,11 @@ def find_def(ast_tree):
                 if hasattr(node.args, "defaults"):
                     for defs in node.args.defaults:
                         if isinstance(defs, ast.Constant):
-                            cons.append(defs.value)
-    
-            defss.append({"Name": node.name, "args": args, "constants": cons})
+                            cons.append(str(defs.value))
+            #new_row = {'name': str(node.name), 'args': str(args), 'constants': str(cons)}
+            new_row = {'name': node.name, 'args': args, 'constants': cons}
+            defss.loc[len(defss)] = new_row
+            #defss = defss.append(new_row, ignore_index=True)
                             #print({"Name": node.name, "value": defs.value, "test": node.args.args[1].arg})
     return defss
 
@@ -119,16 +122,70 @@ def compare(constants1, constants2):
         print("Parameter tuning")
 
 def compare_assignments(assignment1, assignment2):
-    amount = len(assignment1)
-    count = 0
-    for i in range(amount):
-        if assignment1[i]["Name"] == assignment2[i]["Name"] and assignment1[i]["value"] == assignment2[i]["value"]:
-            count = count + 1
-        else:
-            print(f"1: {assignment1[i]} 2: {assignment2[i]}")
 
-    if amount != count:
-        print("Parameter tuning")
+    for row1, row2 in zip(assignment1["value"], assignment2["value"]):
+        diff = difflib.unified_diff(row1, row2, fromfile='file1', tofile='file2', lineterm='', n=0)
+        lines = list(diff)[2:]
+
+        added = [line[1:] for line in lines if line[0] == '+']
+        removed = [line[1:] for line in lines if line[0] == '-']
+
+        if added :
+            print('additions, ignoring position')
+            for line in added:
+                if line not in removed:
+                    print(line)
+
+def compare_defs2(def1, def2):
+
+    diff = difflib.unified_diff(def1["name"].tolist(), def2["name"].tolist(), fromfile='file1', tofile='file2', lineterm='', n=0)
+    lines = list(diff)[2:]
+
+    added = [line[1:] for line in lines if line[0] == '+']
+    removed = [line[1:] for line in lines if line[0] == '-']
+
+    if added :
+        print('additions:')
+        for line in added:
+            print(line)
+
+        print('additions, ignoring position')
+        for line in added:
+            if line not in removed:
+                print(line)
+    
+    for row1, row2 in zip(def1["args"], def2["args"]):
+        #print(row1.strip().splitlines())
+        f_row1 = '\n'.join(row1)
+        f_row2 = '\n'.join(row2)
+        diff = difflib.unified_diff(f_row1.strip().splitlines(), f_row2.strip().splitlines(), fromfile='file1', tofile='file2', lineterm='', n=0)
+        lines = list(diff)[2:]
+        added = [line[1:] for line in lines if line[0] == '+']
+        removed = [line[1:] for line in lines if line[0] == '-']
+
+        if added :
+            
+
+            print('additions, ignoring position')
+            for line in added:
+                if line not in removed:
+                    print(line)
+
+    for val1, val2 in zip(def1["constants"], def2["constants"]):
+        f_val1 = '\n'.join(val1)
+        f_val2 = '\n'.join(val2)
+        diff = difflib.unified_diff(f_val1.strip().splitlines(), f_val2.strip().splitlines(), fromfile='file1', tofile='file2', lineterm='', n=0)
+        lines = list(diff)[2:]
+        added = [line[1:] for line in lines if line[0] == '+']
+        removed = [line[1:] for line in lines if line[0] == '-']
+
+        if added :
+            
+
+            print('additions, ignoring position')
+            for line in added:
+                if line not in removed:
+                    print(line)
     
 def compare_defs(def1, def2):
     amount = len(def1)
@@ -161,6 +218,7 @@ def compare_defs(def1, def2):
                     def1[i]["constants"].append(None)
             
             for arg1, arg2 in zip(def1[i]["args"], def2[i]["args"]):
+                #print(f"{name} 1:{arg1} 2: {arg2}")
                 if arg1 != arg2:
                     print(f"{name} 1:{arg1} 2: {arg2}")
             for val1, val2 in zip(def1[i]["constants"], def2[i]["constants"]):
@@ -191,7 +249,7 @@ for index, row in df.iterrows():
 
     compare(constants, constants2)
     compare_assignments(assignments, assignments2)
-    compare_defs(defs, defs2)
+    compare_defs2(defs, defs2)
 """
 print(f'\nold')
 #for params in vars:
