@@ -28,8 +28,8 @@ def add_node(node, parent=None):
 # Load the DataFrame from the CSV file
 df = pd.read_csv("./pt.csv")
 # Iterate over the rows of the DataFrame
-old_ast = eval(df["oldFileContent"].iloc[0])
-current_ast = eval(df["currentFileContent"].iloc[0])
+old_ast = eval(df["oldFileContent"].iloc[1])
+current_ast = eval(df["currentFileContent"].iloc[1])
 
 code1 = """
 def what(x, y):

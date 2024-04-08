@@ -226,45 +226,35 @@ def compare_defs(def1, def2):
                     print(f"{name} 1:{val1} 2: {val2}")
 
 # Load the DataFrame from the CSV file
-df = pd.read_csv("./pt.csv")
 
-for index, row in df.iterrows():
-    old_ast = eval(df["oldFileContent"].iloc[index])
-    current_ast = eval(df["currentFileContent"].iloc[index])
+def param_tuning(df):
+    #df = pd.read_csv("./pt.csv")
 
-    ast1 = ast.parse(old_ast)
-    ast2 = ast.parse(current_ast)
+    for index, row in df.iterrows():
+        old_ast = eval(df["oldFileContent"].iloc[index])
+        current_ast = eval(df["currentFileContent"].iloc[index])
 
-    call_functions = find_funcs(ast1)
-    constants, variables, everything = findparam(call_functions)
-    vars = findAllValues(variables, ast1)
-    assignments = find_assignments(ast1)
-    defs = find_def(ast1)
+        ast1 = ast.parse(old_ast)
+        ast2 = ast.parse(current_ast)
 
-    call_functions2 = find_funcs(ast2)
-    constants2, variables2, everything2 = findparam(call_functions2)
-    vars2 = findAllValues(variables2, ast2)
-    assignments2 = find_assignments(ast2)
-    defs2 = find_def(ast2)
+        call_functions = find_funcs(ast1)
+        constants, variables, everything = findparam(call_functions)
+        vars = findAllValues(variables, ast1)
+        assignments = find_assignments(ast1)
+        defs = find_def(ast1)
 
-    compare(constants, constants2)
-    compare_assignments(assignments, assignments2)
-    compare_defs2(defs, defs2)
-"""
-print(f'\nold')
-#for params in vars:
-#    print(f'{params}')
-for ever in everything:
-    print(f'{ever}')
-#for cons in constants:
-#    print(f'{cons}')
+        call_functions2 = find_funcs(ast2)
+        constants2, variables2, everything2 = findparam(call_functions2)
+        vars2 = findAllValues(variables2, ast2)
+        assignments2 = find_assignments(ast2)
+        defs2 = find_def(ast2)
 
-print(f'\nnew')
-#for params2 in vars2:
-#    print(f'{params2}')
-for cons2 in constants2:
-    print(f'{cons2}')
-"""
+        compare(constants, constants2)
+        compare_assignments(assignments, assignments2)
+        compare_defs2(defs, defs2)
+
+
+param_tuning()
 
 
 
