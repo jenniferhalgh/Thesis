@@ -40,9 +40,13 @@ def clone_repo(github_link):
         return repo_path, commit_hash
     except git.exc.GitCommandError as e:
         if 'Repository not found' in str(e):
+            print("none")
             return None, None
         else:
-            repo = Repo.clone_from(git_url, repo_path, branch='master', no_checkout=True, mirror=True)
-        
+            try:
+                repo = Repo.clone_from(git_url, repo_path, branch='master', no_checkout=True, mirror=True)
+            except git.exc.GitCommandError as e:
+                repo = Repo.clone_from(git_url, repo_path, no_checkout=True, mirror=True)
+    
         return repo_path, commit_hash
 
