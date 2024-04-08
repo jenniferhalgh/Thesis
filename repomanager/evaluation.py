@@ -1,7 +1,9 @@
 import argparse
+from urllib.parse import urlparse
 from repo_utils import clone_repo
 from repo_changes import commit_changes
 from parameter_tuning import parameter_tuning
+from output2 import clone_and_analyze
 #from find_change2 import param_tuning
 import pandas as pd
 import os
@@ -30,6 +32,7 @@ def evaluate_all():
 def test_data():
     pt = False
     count = 0
+    count_output = 0
     unavailable = 0
     test_data = pd.DataFrame()
     directory = './repomanager/Data/testing/test_pt'
@@ -39,20 +42,29 @@ def test_data():
         df = pd.read_csv(filepath)
         for index, row in df.iterrows():
             repo_path, commit_hash = clone_repo(df["sample_url"][index])
+            parsed_url = urlparse(df["sample_url"][index])
+            path_segments = parsed_url.path.strip('/').split('/')
+            
+            username, repo_name, commit, commit_hash = path_segments
+            #print(repo_path)
             print(df["sample_url"][index])
             if repo_path and commit_hash:
                 commit = commit_changes(repo_path, commit_hash)
                 if not commit.empty:
                     pt = parameter_tuning()
+                    od = clone_and_analyze(f"https://github.com/{username}/{repo_name}", commit_hash)
                     if pt:
                         #print("True")
                         count = count + 1
+                    if od:
+                        count_output = count_output + 1
                 else:
                     unavailable = unavailable + 1
             else:
                 unavailable = unavailable + 1
     
     print(f"parameter tuning: {count}")
+    print(f"output data: {count_output}")
     #print(f"accuracy: {count}")
     print(f"unavailable (due to no .py file): {unavailable}")
                 

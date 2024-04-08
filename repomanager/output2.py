@@ -1,4 +1,6 @@
 import ast
+from ast import *
+import astunparse
 import difflib
 import os
 import re
@@ -82,7 +84,7 @@ class CodeChangeDetector(ast.NodeVisitor):
         operations = set()
         for node in ast.walk(ast_node):
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr in ['write', 'save', 'savefig', 'to_csv', 'to_json', 'save_images']:
-                operation = ast.unparse(node)
+                operation = ast.dump(node)
                 operations.add(operation)
         return operations
     
@@ -135,6 +137,7 @@ class CodeChangeDetector(ast.NodeVisitor):
         self.detect_tf_name_scope_changes()
 
 def clone_and_analyze(repo_url, commit_hash):
+    changes = False
     parsed_url = urlparse(repo_url)
     repo_name = parsed_url.path.split('/')[-1].replace('.git', '')
     repo_dir = os.path.join("cloned_repos", repo_name)
@@ -166,12 +169,16 @@ def clone_and_analyze(repo_url, commit_hash):
                 detector = CodeChangeDetector(old_content, new_content)
                 detector.detect_changes()
                 
-                if detector.changes:
+                if len(detector.changes)!=0:
                     print(f"Changes detected in {diff_item.a_path}:")
                     for change in detector.changes:
                         print(f" - {change}")
+                    changes = True
                 else:
                     print(f"No specific 'output data type' changes detected in {diff_item.a_path}.")
+                    print("")
+        print(changes)
+        return changes
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -188,6 +195,8 @@ if __name__ == "__main__":
     #commit_hash = "0852d4b49d38f02cf2e699a63f6b5fec63ef7ea7"
     #repo_url = "https://github.com/jakeret/tf_unet"
     #commit_hash = "9f0e79b6a38c0bbb26d674d83851e18ca0f379cc"
-    repo_url = "https://github.com/google/youtube-8m"
-    commit_hash = "462baeeb1209e3add9ed728c4b0f9dd6dde9ba9b"
+    #repo_url = "https://github.com/google/youtube-8m"
+    #commit_hash = "462baeeb1209e3add9ed728c4b0f9dd6dde9ba9b"
+    repo_url = "https://github.com/commaai/research"
+    commit_hash = "428f1dba063607200b3022e0ea7ef3a6c700876f"
     clone_and_analyze(repo_url, commit_hash)
