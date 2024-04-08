@@ -2,7 +2,8 @@ import ast
 import difflib
 import os
 import re
-from git import Repo
+import shutil
+from git import Repo, InvalidGitRepositoryError
 from urllib.parse import urlparse
 
 def get_file_content(repo, commit, file_path):
@@ -84,31 +85,79 @@ class CodeChangeDetector(ast.NodeVisitor):
                 operation = ast.unparse(node)
                 operations.add(operation)
         return operations
+    
+    def detect_tf_name_scope_changes(self):
+        """
+        Detects changes related to the introduction, removal, or modification of tf.name_scope.
+        """
+        old_name_scopes = self._collect_tf_name_scope_usages(self.old_source)
+        new_name_scopes = self._collect_tf_name_scope_usages(self.new_source)
+
+        added_name_scopes = new_name_scopes - old_name_scopes
+        removed_name_scopes = old_name_scopes - new_name_scopes
+
+        for scope in added_name_scopes:
+            self.changes.append(f"Added TensorFlow name scope: {scope}")
+        for scope in removed_name_scopes:
+            self.changes.append(f"Removed TensorFlow name scope: {scope}")
+
+    def _collect_tf_name_scope_usages(self, source_code):
+        """
+        Collects TensorFlow name scope usages from the source code.
+        """
+        scopes = set()
+        try:
+            parsed_ast = ast.parse(source_code)
+            for node in ast.walk(parsed_ast):
+                if isinstance(node, ast.With) and isinstance(node.items[0].context_expr, ast.Call):
+                    call_node = node.items[0].context_expr
+                    if (isinstance(call_node.func, ast.Attribute) and 
+                        call_node.func.attr == 'name_scope' and
+                        isinstance(call_node.func.value, ast.Name) and
+                        call_node.func.value.id == 'tf'):
+                        try:
+                            scope_name = ast.literal_eval(call_node.args[0])
+                            scopes.add(scope_name)
+                        except ValueError:
+                            # Handle cases where scope name is not a simple string literal
+                            pass
+        except SyntaxError as e:
+            # Handle syntax errors in parsing, which might occur with incompatible Python code
+            pass
+        return scopes
+    
+    
 
     def detect_changes(self):
         self.detectFormatChange()
         self.detectModifyingFilePaths()
         self.detectFileWritingOperation()
+        self.detect_tf_name_scope_changes()
 
 def clone_and_analyze(repo_url, commit_hash):
     parsed_url = urlparse(repo_url)
     repo_name = parsed_url.path.split('/')[-1].replace('.git', '')
     repo_dir = os.path.join("cloned_repos", repo_name)
 
-    if not os.path.exists(repo_dir):
-        print(f"Cloning {repo_url}...")
-        repo = Repo.clone_from(repo_url, repo_dir)  
-    else:
-        print(f"Repository {repo_name} already exists. Fetching updates...")
-        repo = Repo(repo_dir)  
-        repo.git.fetch()
-
     try:
-        repo.git.checkout(commit_hash)  
-    
+        if os.path.exists(repo_dir):
+            try:
+                repo = Repo(repo_dir)
+                print(f"Repository {repo_name} already exists. Fetching updates...")
+                repo.git.fetch()
+            except InvalidGitRepositoryError:
+                print(f"The directory {repo_dir} exists but is not a valid Git repository. Deleting and re-cloning...")
+                shutil.rmtree(repo_dir)  # Ensure safety of this operation in your context
+                repo = Repo.clone_from(repo_url, repo_dir)
+        else:
+            print(f"Cloning {repo_url}...")
+            repo = Repo.clone_from(repo_url, repo_dir)
+
+        repo.git.checkout(commit_hash)
+        
         commit = repo.commit(commit_hash)
         parent_commit = commit.parents[0] if commit.parents else commit
-    
+
         for diff_item in commit.diff(parent_commit, create_patch=True):
             if diff_item.a_path.endswith('.py'):
                 old_content = get_file_content(repo, parent_commit, diff_item.a_path) or ""
@@ -123,11 +172,22 @@ def clone_and_analyze(repo_url, commit_hash):
                         print(f" - {change}")
                 else:
                     print(f"No specific 'output data type' changes detected in {diff_item.a_path}.")
+
     except Exception as e:
         print(f"An error occurred: {e}")
 
 
 if __name__ == "__main__":
-    repo_url = "https://github.com/Mappy/tf-faster-rcnn"
-    commit_hash = "51e0889fbdcd4c48f31def4c1cb05a5a4db04671"
+    #repo_url = "https://github.com/Mappy/tf-faster-rcnn"
+    #commit_hash = "51e0889fbdcd4c48f31def4c1cb05a5a4db04671"
+    #repo_url = "https://github.com/Mappy/tf-faster-rcnn"
+    #commit_hash = "29aefedc73be3d7419ba72802f347e372382db7d"
+    #repo_url = "https://github.com/thtrieu/darkflow"
+    #commit_hash = "ea141f91e59e8b8da92e2292f00bb601e0e69008"
+    #repo_url = "https://github.com/atriumlts/subpixel"
+    #commit_hash = "0852d4b49d38f02cf2e699a63f6b5fec63ef7ea7"
+    #repo_url = "https://github.com/jakeret/tf_unet"
+    #commit_hash = "9f0e79b6a38c0bbb26d674d83851e18ca0f379cc"
+    repo_url = "https://github.com/google/youtube-8m"
+    commit_hash = "462baeeb1209e3add9ed728c4b0f9dd6dde9ba9b"
     clone_and_analyze(repo_url, commit_hash)
