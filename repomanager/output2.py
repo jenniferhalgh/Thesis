@@ -128,6 +128,33 @@ class CodeChangeDetector(ast.NodeVisitor):
             pass
         return scopes
     
+    def detectPrint(self):
+        
+        # Patterns to identify logging or print statements
+        logging_patterns = [
+            r'\bprint\(',
+            r'\blogging\.\w+\('
+        ]
+        
+        diff = list(difflib.unified_diff(self.old_source.splitlines(), self.new_source.splitlines(), n=0))
+        
+        for line in diff:
+            if line.startswith('+') and any(re.search(pattern, line) for pattern in logging_patterns):
+                line_number = self._get_line_number_for_added_line(diff, line)
+                self.changes.append(f"Added logging or print statement: {line.strip()} at line {line_number}")
+
+    def _get_line_number_for_added_line(self, diff, added_line):
+        
+        line_count = 0
+        for line in diff:
+            if line.startswith(' '):
+                line_count += 1
+            elif line == added_line:
+                return line_count + 1 
+        return "Unknown line number"  
+    
+    
+
     
 
     def detect_changes(self):
@@ -135,6 +162,7 @@ class CodeChangeDetector(ast.NodeVisitor):
         self.detectModifyingFilePaths()
         self.detectFileWritingOperation()
         self.detect_tf_name_scope_changes()
+        self.detectPrint()
 
 def clone_and_analyze(repo_url, commit_hash):
     changes = False
@@ -197,6 +225,6 @@ if __name__ == "__main__":
     #commit_hash = "9f0e79b6a38c0bbb26d674d83851e18ca0f379cc"
     #repo_url = "https://github.com/google/youtube-8m"
     #commit_hash = "462baeeb1209e3add9ed728c4b0f9dd6dde9ba9b"
-    repo_url = "https://github.com/commaai/research"
-    commit_hash = "428f1dba063607200b3022e0ea7ef3a6c700876f"
+    repo_url = "https://github.com/andrewb-ms/fast-style-transfer	"
+    commit_hash = "47c993b71e2fe717e21fc3da4e8e69261832ca85"
     clone_and_analyze(repo_url, commit_hash)
