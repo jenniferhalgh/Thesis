@@ -38,8 +38,8 @@ def commit_changes(repo_path, commit_hash=None):
         
         if path.endswith('.py') or path.endswith('.cfg'):
             try:
-                old_file_content = ast.dump(ast.parse(repo.git.show(f'{commit.parents[0]}:{path}')))
-                current_file_content = ast.dump(ast.parse(repo.git.show(f'{commit.hexsha}:{path}')))
+                old_file_content = repo.git.show(f'{commit.parents[0]}:{path}')
+                current_file_content = repo.git.show(f'{commit.hexsha}:{path}')
                 modified_files.append(
                 {"Path": path, "oldFileContent": old_file_content, "currentFileContent": current_file_content})
             except SyntaxError as e:
@@ -51,5 +51,4 @@ def commit_changes(repo_path, commit_hash=None):
                 df.to_csv("pt.csv", index=False)
                 return df
     df = pd.DataFrame(modified_files)
-    df.to_csv("pt.csv", index=False)
     return df

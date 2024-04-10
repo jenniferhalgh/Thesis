@@ -1,0 +1,9 @@
+Index,sample_url,feature,platform,bug fix,debug,cross,preprocessing,model chng,training chng,accuracy,performance,security,maintenance,add module,move module,remove module,split module,add package,remove package,update package,licence,clean up,token replace,refactor,indent,branch,external,merge,versionning,source control,build_config,testing,documentation,internationalization,input data,output data,program data,exploit additionnal data,understanding,param tinkering,sharing,Compatibility Fix,param list chng,add config,adding_regenerated code files,change_of_file_permission_or_encoding,copy_and_customize_module,evaluation_code_change,visual_output_change
+45,https://github.com/apollo-time/facenet/commit/715d5cfbd2eef70e83f55ff9b697d13173ee06de,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_0Rater_1,,,,,,,,,,,,,
+254,https://github.com/commaai/research/commit/428f1dba063607200b3022e0ea7ef3a6c700876f,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,
+16,https://github.com/benchou1919/KittiSeg/commit/a8f23b462b1a244edd53b9fe5867587c67a3a1c5,,,,Rater_0Rater_2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_0Rater_1,,,,,,,,,,,,,
+130,https://github.com/andrewb-ms/fast-style-transfer/commit/47c993b71e2fe717e21fc3da4e8e69261832ca85,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_0Rater_1,,,,,,,,,,,,,
+417,https://github.com/thtrieu/darkflow/commit/ea141f91e59e8b8da92e2292f00bb601e0e69008,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,
+436,https://github.com/jakeret/tf_unet/commit/bfd9da2a6eb8acb286f78ff6a95ce5e5744f3662,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,
+252,https://github.com/Mappy/tf-faster-rcnn/commit/29aefedc73be3d7419ba72802f347e372382db7d,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,
+145,https://github.com/dkermany/darkflow/commit/cece15f9cb8d68cd1ca23291615e73b1a3502f2a,,,,Rater_0Rater_1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_0Rater_1,,,,,,,,,,,,,

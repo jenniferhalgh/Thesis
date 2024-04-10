@@ -7,6 +7,8 @@ import re
 import shutil
 from git import Repo, InvalidGitRepositoryError
 from urllib.parse import urlparse
+from repo_utils import clone_repo
+from repo_changes import commit_changes
 
 def get_file_content(repo, commit, file_path):
     try:
@@ -193,6 +195,7 @@ def clone_and_analyze(repo_url, commit_hash):
             if diff_item.a_path.endswith('.py'):
                 old_content = get_file_content(repo, parent_commit, diff_item.a_path) or ""
                 new_content = get_file_content(repo, commit, diff_item.a_path) or ""
+                print(type(old_content))
                 
                 detector = CodeChangeDetector(old_content, new_content)
                 detector.detect_changes()
@@ -211,8 +214,30 @@ def clone_and_analyze(repo_url, commit_hash):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def output_data(df):
+    changes = False
+    for index, row in df.iterrows():
+        old_content = df["oldFileContent"].iloc[index]
+        new_content = df["currentFileContent"].iloc[index]
+
+        detector = CodeChangeDetector(old_content, new_content)
+        detector.detect_changes()
+
+        if len(detector.changes)!=0:
+            print(f"Changes detected in {df['Path'][index]}:")
+            for change in detector.changes:
+                print(f" - {change}")
+            changes = True
+        else:
+            print(f"No specific 'output data type' changes detected in {df['Path'][index]}.")
+            print("")
+    
+    
+    print(changes)
+    return changes
 
 if __name__ == "__main__":
+    
     #repo_url = "https://github.com/Mappy/tf-faster-rcnn"
     #commit_hash = "51e0889fbdcd4c48f31def4c1cb05a5a4db04671"
     #repo_url = "https://github.com/Mappy/tf-faster-rcnn"
@@ -225,6 +250,10 @@ if __name__ == "__main__":
     #commit_hash = "9f0e79b6a38c0bbb26d674d83851e18ca0f379cc"
     #repo_url = "https://github.com/google/youtube-8m"
     #commit_hash = "462baeeb1209e3add9ed728c4b0f9dd6dde9ba9b"
-    repo_url = "https://github.com/andrewb-ms/fast-style-transfer	"
-    commit_hash = "47c993b71e2fe717e21fc3da4e8e69261832ca85"
-    clone_and_analyze(repo_url, commit_hash)
+    #repo_url = "https://github.com/andrewb-ms/fast-style-transfer"
+    #commit_hash = "47c993b71e2fe717e21fc3da4e8e69261832ca85"
+    repo_path, commit_hash = clone_repo("https://github.com/jakeret/tf_unet/commit/44a09751e081506cd816e3eee1ecffc7303b65d3")
+    df = commit_changes(repo_path, commit_hash)
+    
+    output_data(df)
+    

@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 from repo_utils import clone_repo
 from repo_changes import commit_changes
 from parameter_tuning import parameter_tuning
-from output2 import clone_and_analyze
+from output_data import output_data
 import numpy as np
 #from find_change2 import param_tuning
 import pandas as pd
@@ -81,13 +81,13 @@ def test_data():
                         commit = commit_changes(repo_path, commit_hash)
                         if not commit.empty:
                             pt = parameter_tuning(commit)
-                            #od = clone_and_analyze(f"https://github.com/{username}/{repo_name}", commit_hash)
+                            od = output_data(commit)
                             if pt:
                                 print(f"True: {parts[0]}")
                                 count = count + 1
                                 #confusion_matrix.at['param tinkering', parts[0]] = confusion_matrix.at['param tinkering', parts[0]] + 1
-                            #if od:
-                            #    count_output = count_output + 1
+                            if od:
+                                count_output = count_output + 1
                         else:
                             print("unavailable")
                             unavailable = unavailable + 1

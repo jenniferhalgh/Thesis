@@ -2,6 +2,7 @@ import ast
 from ast import *
 import difflib
 import pandas as pd
+from repo_changes import commit_changes
 
 class ConstantCollector(ast.NodeVisitor):
     def __init__(self, source):
@@ -105,26 +106,29 @@ def parameter_tuning(df):
     count = 0
     for index, row in df.iterrows():
         #print("hello")
-        old_ast = eval(df["oldFileContent"].iloc[index])
-        current_ast = eval(df["currentFileContent"].iloc[index])
-        ast1 = ast.parse(old_ast)
-        ast2 = ast.parse(current_ast)
+        try:
+            ast1 = ast.parse(df["oldFileContent"].iloc[index])
+            ast2 = ast.parse(df["currentFileContent"].iloc[index])
+        except SyntaxError as e:
+                ast1 = None
+                ast2 = None
+                print(f"SyntaxError occurred while parsing file {df['Path'][index]}: {e}")
 
-
-        old, new, names = get_constants(ast1, ast2)
-        
-        for index2, row2 in new.iterrows():
-            if new["name"][index2] not in names:
-                new.drop(index2)
-        #print("names")
-        #print(names)
-        #print("old")
-        #print(old)
-        #print("new")
-        #print(new)
-        result = compare(old, new)
-        if result:
-            count = count + 1
+        if ast1 and ast2:
+            old, new, names = get_constants(ast1, ast2)
+            
+            for index2, row2 in new.iterrows():
+                if new["name"][index2] not in names:
+                    new.drop(index2)
+            #print("names")
+            #print(names)
+            #print("old")
+            #print(old)
+            #print("new")
+            #print(new)
+            result = compare(old, new)
+            if result:
+                count = count + 1
     if count > 0:
         param = True
     else:
@@ -133,5 +137,6 @@ def parameter_tuning(df):
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("./pt.csv")
+    repo_path, commit_hash = clone_repo("https://github.com/jakeret/tf_unet/commit/44a09751e081506cd816e3eee1ecffc7303b65d3")
+    df = commit_changes(repo_path, commit_hash)
     parameter_tuning(df)
