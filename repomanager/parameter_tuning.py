@@ -93,14 +93,14 @@ def compare(old, new):
         #print('additions, ignoring position')
         for line in added:
             if line not in removed:
-                #print(line)
+                print(line)
                 param_tuning = True
 
     return param_tuning
     
 
-def parameter_tuning():
-    df = pd.read_csv("./pt.csv")
+def parameter_tuning(df):
+    #df = pd.read_csv("./pt.csv")
     #print(len(df))
     count = 0
     for index, row in df.iterrows():
@@ -116,7 +116,12 @@ def parameter_tuning():
         for index2, row2 in new.iterrows():
             if new["name"][index2] not in names:
                 new.drop(index2)
-        
+        #print("names")
+        #print(names)
+        #print("old")
+        #print(old)
+        #print("new")
+        #print(new)
         result = compare(old, new)
         if result:
             count = count + 1
@@ -128,4 +133,5 @@ def parameter_tuning():
 
 
 if __name__ == "__main__":
-    parameter_tuning()
+    df = pd.read_csv("./pt.csv")
+    parameter_tuning(df)

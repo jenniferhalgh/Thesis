@@ -30,7 +30,7 @@ def clone_repo(github_link):
     git_url = f'https://github.com/{username}/{repo_name}.git'
     repo_path = os.path.abspath(f"./Repos/{username}/{repo_name}")
     if path.exists(repo_path):
-        #print("Repo Already Cloned.")
+        print("Repo Already Cloned.")
         return repo_path, commit_hash
 
     try:
@@ -40,7 +40,7 @@ def clone_repo(github_link):
         return repo_path, commit_hash
     except git.exc.GitCommandError as e:
         if 'Repository not found' in str(e):
-            print("none")
+            print(git_url)
             return None, None
         else:
             try:

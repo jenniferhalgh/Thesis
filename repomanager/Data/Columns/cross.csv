@@ -1,0 +1,12 @@
+Index,sample_url,feature,platform,bug fix,debug,cross,preprocessing,model chng,training chng,accuracy,performance,security,maintenance,add module,move module,remove module,split module,add package,remove package,update package,licence,clean up,token replace,refactor,indent,branch,external,merge,versionning,source control,build_config,testing,documentation,internationalization,input data,output data,program data,exploit additionnal data,understanding,param tinkering,sharing,Compatibility Fix,param list chng,add config,adding_regenerated code files,change_of_file_permission_or_encoding,copy_and_customize_module,evaluation_code_change,visual_output_change
+80,https://github.com/google/youtube-8m/commit/3348a46347b500057a0cf3f8bd0a8f9647dd2627,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+172,https://github.com/thtrieu/darkflow/commit/f3e3e49add8d7e21fb7dfb80d7ccba91500b6ce4,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,
+231,https://github.com/MaybeShewill-CV/CRNN_Tensorflow/commit/c7f95547efdd1dd9e2980a12c0a7f99ad2b85ff5,,,,,Rater_1Rater_0,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,
+235,https://github.com/MaybeShewill-CV/CRNN_Tensorflow/commit/c7f95547efdd1dd9e2980a12c0a7f99ad2b85ff5,,,,,Rater_1Rater_0,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,
+257,https://github.com/commaai/research/commit/c6e708de360706e97c14a75f7422614bec836077,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+365,https://github.com/davidsandberg/facenet/commit/ebd41534269cfb55961e0cc738380abb60807f9c,,,,,Rater_1Rater_0,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,
+405,https://github.com/lengstrom/fast-style-transfer/commit/f207dee29c8642b8ef94d03d9574c024fcd14ef3,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+461,https://github.com/MaybeShewill-CV/CRNN_Tensorflow/commit/e9efacf88f444b2fb9b114b8076ed43df26a7e8a,Rater_1Rater_0,,,,Rater_1Rater_0,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+462,https://github.com/MaybeShewill-CV/CRNN_Tensorflow/commit/7c7cb5553b095ea58672683c0843940923890707,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,
+483,https://github.com/GeorgeSeif/Semantic-Segmentation-Suite/commit/b6c22bdbbc149d4a75059d41b1ce5a4b6b44ec9e,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+519,https://github.com/yangyanli/PointCNN/commit/2c496db14ec35bc39754124e89708539a6f0bf96,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

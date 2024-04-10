@@ -1,0 +1,18 @@
+Index,sample_url,feature,platform,bug fix,debug,cross,preprocessing,model chng,training chng,accuracy,performance,security,maintenance,add module,move module,remove module,split module,add package,remove package,update package,licence,clean up,token replace,refactor,indent,branch,external,merge,versionning,source control,build_config,testing,documentation,internationalization,input data,output data,program data,exploit additionnal data,understanding,param tinkering,sharing,Compatibility Fix,param list chng,add config,adding_regenerated code files,change_of_file_permission_or_encoding,copy_and_customize_module,evaluation_code_change,visual_output_change
+247,https://github.com/tuq820/Realtime_Multi-Person_Pose_Estimation/commit/8238acb7c2aee728555c05f95c5b118b732f665e,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_0Rater_1,,,,,Rater_0Rater_1,,Rater_0Rater_1,Rater_0Rater_1,,,,,,,,,,,,,Rater_0Rater_1
+109,https://github.com/Pariyat/fast-style-transfer/commit/5f027d8d4b2083254afd32d285653195bb25ec53,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_0Rater_1,Rater_0Rater_1,,,,,,,,,,,,,
+202,https://github.com/smallcorgi/Faster-RCNN_TF/commit/3e81c38dad977c71d3bfd0b7244cbb8cdf0466af,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,Rater_1Rater_0,,,,Rater_1Rater_0,,,,,,,,,,,,,
+437,https://github.com/jakeret/tf_unet/commit/9f0e79b6a38c0bbb26d674d83851e18ca0f379cc,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,
+35,https://github.com/helloyide/facenet/commit/931b08545f15e00b47ebbf6aeedebc0668f5d7c3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_0Rater_1,,,,,,,,,,,,,
+36,https://github.com/kilgore92/facenet/commit/c798402819ad40da99150ccce5fc4ee77b52f365,,,Rater_0Rater_1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_0Rater_1,,,,,,,,,,,,,
+84,https://github.com/minghz/CapsNet-Tensorflow/commit/49a871730581a1742be3adf21b90bcbd36d420f9,,,,,,,,,,,,,,,,,,,,,,,Rater_0Rater_1,,,,,,,,,,,,Rater_0Rater_1,,,,,,,,,,,,,
+34,https://github.com/helloyide/facenet/commit/724ece2e73ccabca004558f163f610163ff58708,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_0Rater_1,,,,,,,,,,,,,
+365,https://github.com/davidsandberg/facenet/commit/ebd41534269cfb55961e0cc738380abb60807f9c,,,,,Rater_1Rater_0,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,
+108,https://github.com/dmclark17/fast-style-transfer/commit/863ddf7ce0c1efcb425d822ecb5f76664c87fa0b,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_0Rater_1,,,,,,,,,,,,,
+341,https://github.com/atriumlts/subpixel/commit/0852d4b49d38f02cf2e699a63f6b5fec63ef7ea7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,
+418,https://github.com/thtrieu/darkflow/commit/a7cf5a97532a368e70893240c01893fcb0dee6bf,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,
+189,https://github.com/yangcan2017/text-detection-ctpn/commit/30d3c59a59fb8926aea1ecb21c866240accc2a5a,,,,,,,,,,,,,,,,,,Rater_0Rater_1,,,Rater_0Rater_1,,,,,,,,,Rater_0Rater_1,,,,,Rater_0Rater_1,,,,,,,,,Rater_0Rater_1,Rater_0Rater_1,,,
+89,https://github.com/google/youtube-8m/commit/ec47c61f69c77d2f50b20dd6e516019275c7eaee,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,
+276,https://github.com/modanesh/facenet/commit/42be355f4c63d60e2c1b6dbc9238b0b6c38a07c8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,
+299,https://github.com/ZhenyiZhao/CapsNet-Tensorflow/commit/53f70d1f0aec7a373a57ff92ba713685db28df99,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,
+441,https://github.com/jakeret/tf_unet/commit/44a09751e081506cd816e3eee1ecffc7303b65d3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,

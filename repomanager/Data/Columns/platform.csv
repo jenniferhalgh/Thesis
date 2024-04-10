@@ -1,0 +1,11 @@
+Index,sample_url,feature,platform,bug fix,debug,cross,preprocessing,model chng,training chng,accuracy,performance,security,maintenance,add module,move module,remove module,split module,add package,remove package,update package,licence,clean up,token replace,refactor,indent,branch,external,merge,versionning,source control,build_config,testing,documentation,internationalization,input data,output data,program data,exploit additionnal data,understanding,param tinkering,sharing,Compatibility Fix,param list chng,add config,adding_regenerated code files,change_of_file_permission_or_encoding,copy_and_customize_module,evaluation_code_change,visual_output_change
+5,https://github.com/endernewton/tf-faster-rcnn/commit/c9ace58675aa89d81585bbbbd762f23a46d2244d,,Rater_2Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+23,https://github.com/endernewton/tf-faster-rcnn/commit/66d36f09107be74275cc9df080ef06af78655f39,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+77,https://github.com/google/youtube-8m/commit/74d399038a0f80a950bbaf808bd4ac78948f8451,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+110,https://github.com/google/youtube-8m/commit/7808eef0110cdf16eeca9ca82118fda99fe7b6dd,Rater_1Rater_0,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+198,https://github.com/smallcorgi/Faster-RCNN_TF/commit/b1622896e2dd1579d09045fea2392c4ff74b03ab,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+201,https://github.com/smallcorgi/Faster-RCNN_TF/commit/4fe957aab25b211f9c94de78521b00c3de0901a4,,Rater_2Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+339,https://github.com/ZheC/Realtime_Multi-Person_Pose_Estimation/commit/67b711f8c1493923f16757be4ea97d0d0e3d7434,,Rater_1Rater_0,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+524,https://github.com/AlexEMG/DeepLabCut/commit/d3ed9640d898cfc5bfbe2a1ff780ef6141edce7c,,Rater_1Rater_0,,,,,,,,,,,Rater_1Rater_0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+71,https://github.com/greentfrapp/youtube-8m/commit/10c8a0ab23722bbe925899cd64225d53550e37f6,,Rater_0Rater_1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+98,https://github.com/eugeneh101/fast-style-transfer/commit/2ced806ff8872f55fceb6c9d05c3ed0784759926,,Rater_0Rater_1,,,,,,Rater_0Rater_1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
