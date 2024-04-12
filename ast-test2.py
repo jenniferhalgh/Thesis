@@ -10,6 +10,8 @@ def add_node(node, parent=None):
     if isinstance(node, ast.Call):
         if isinstance(node.func, ast.Attribute):
             node_name += f": {node.func.attr}"
+        if isinstance(node.func, ast.Name):
+            node_name += f": {node.func.id}"
     if isinstance(node, ast.Constant):
         node_name += f": {node.value}"
     dot.node(str(id(node)), node_name)
@@ -21,28 +23,7 @@ def add_node(node, parent=None):
 # Add nodes to the Digraph
 
 code = '''
-from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Resizing, Dropout
-from keras.applications import vgg16
-from keras.callbacks import EarlyStopping
-from keras import regularizers
-#Done by: Jennifer
-def train_model_v2(num_classes, X_train, y_train, X_val, y_val):
-   
-    vgg=vgg16.VGG16(weights='imagenet', include_top=False, input_shape=(224,224,3))
-    for layer in vgg.layers:
-        layer.trainable = False
-
-    model = Sequential()
-    model.add(vgg)
-    model.add(Flatten())
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(num_classes, activation='softmax', kernel_regularizer=regularizers.l1_l2(0.1)))
-    model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accuracy'])
-    early_stopping = EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
-   
-    history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=20, batch_size=10, callbacks=[early_stopping])
-    return model, history
+Z1 = np.random.rand(1,65536)
 '''
 
 code2="""
@@ -61,7 +42,7 @@ class FrameLevelLogisticModel(models.BaseModel):
     return {"predictions": output}
 """
 
-tree = ast.parse(code2)
+tree = ast.parse(code)
 add_node(tree)
 
 dot.format = 'png'

@@ -3,6 +3,7 @@ from ast import *
 import difflib
 import pandas as pd
 from repo_changes import commit_changes
+from repo_utils import clone_repo
 
 class ConstantCollector(ast.NodeVisitor):
     def __init__(self, source):
@@ -11,16 +12,20 @@ class ConstantCollector(ast.NodeVisitor):
         self.names = set()
 
     def visit_Constant(self, node):
-        if isinstance(node.value, (int, float)):
+        if isinstance(node.value, (int, float)) and type(node.value) is not bool:
             parent = self._find_parent(node)
             
             name = ""
             if isinstance(parent, ast.Call):
-                if isinstance(parent.func, ast.Attribute):
-                    name = parent.func.attr
-                elif isinstance(parent.func, ast.Name):
-                    #print(node.value)
-                    name = parent.func.id
+                grandparent = self._find_parent(parent)
+                #print(grandparent)
+                if not isinstance(grandparent, ast.For):
+                    if isinstance(parent.func, ast.Attribute):
+                        name = parent.func.attr
+                    elif isinstance(parent.func, ast.Name):
+                        #print(node.value)
+                        name = parent.func.id
+                        #print(name)
             elif isinstance(parent, ast.keyword):
                 name = parent.arg
             elif isinstance(parent, ast.arguments):
@@ -137,6 +142,6 @@ def parameter_tuning(df):
 
 
 if __name__ == "__main__":
-    repo_path, commit_hash = clone_repo("https://github.com/jakeret/tf_unet/commit/44a09751e081506cd816e3eee1ecffc7303b65d3")
+    repo_path, commit_hash = clone_repo("https://github.com/jakeret/tf_unet/commit/d08d48e05ec99506dca95ed2955ab10facd8e84e")
     df = commit_changes(repo_path, commit_hash)
     parameter_tuning(df)

@@ -30,6 +30,7 @@ def evaluate_one(link):
 def evaluate_all():
     df = pd.read_csv("testing_dataset")
 
+"""
 def confusion_matrix():
     confusion_matrix = pd.DataFrame()
     #confusion_matrix[""] = np.nan
@@ -45,17 +46,31 @@ def confusion_matrix():
     # Set the index 
     confusion_matrix.index = index_ 
     confusion_matrix.to_csv("./repomanager/cm.csv")
-    
+"""    
+def confusion_matrix(category):
+    cm = pd.DataFrame()
+    cm[f"(p) - {category}"] = pd.Series([0] * 2)
+    cm[f"(p) - not {category}"] = pd.Series([0] * 2)
+    indices = [f"(a) - {category}", f"(a) - not {category}"]
+    index_ = indices
+    cm.index = index_ 
+    cm.to_csv(f"./repomanager/cm-{category}.csv")
+    return cm
 
 
-def test_data():
+def test_data(category):
+    #df = confusion_matrix(category)
+    true_p = 0
+    false_p = 0
+    false_n = 0
+    true_n = 0
     pt = False
     count = 0
     count_output = 0
     unavailable = 0
     urls = set()
     test_data = pd.DataFrame()
-    confusion_matrix = pd.read_csv("./repomanager/cm.csv", index_col=0)
+    confusion_matrix = pd.read_csv(f"./repomanager/cm-{category}.csv", index_col=0)
     #print(confusion_matrix.columns)
     index_names = confusion_matrix.index.tolist()
     #print(index_names)
@@ -80,29 +95,88 @@ def test_data():
                     if repo_path and commit_hash:
                         commit = commit_changes(repo_path, commit_hash)
                         if not commit.empty:
-                            pt = parameter_tuning(commit)
-                            od = output_data(commit)
-                            if pt:
-                                print(f"True: {parts[0]}")
-                                count = count + 1
+                            if category == "param tinkering":
+                                pt = parameter_tuning(commit)
+                                #od = output_data(commit)
+
+                                #predicted pt
+                                if pt:
+                                    #actual pt
+                                    if pd.notna(df[category][index]):
+                                        #true positive
+                                        true_p = true_p + 1 
+                                        print("TRUE")
+                                    #actual not pt
+                                    else:
+                                        #false positive
+                                        false_p = false_p + 1
+                                    print(f"True: {parts[0]}")
+                                    count = count + 1
+                                #predicted not pt
+                                elif not pt:
+                                    #actual not pt
+                                    if not pd.notna(df[category][index]):
+                                        true_n = true_n + 1
+                                    #acual pt
+                                    else:
+                                        false_n = false_n + 1
+                            elif category == "output data":
+                                #pt = parameter_tuning(commit)
+                                od = output_data(commit)
+
+                                #predicted pt
+                                if od:
+                                    #actual pt
+                                    if pd.notna(df[category][index]):
+                                        #true positive
+                                        true_p = true_p + 1 
+                                        print("TRUE")
+                                    #actual not pt
+                                    else:
+                                        #false positive
+                                        false_p = false_p + 1
+                                    print(f"True: {parts[0]}")
+                                    count_output = count_output + 1
+                                #predicted not pt
+                                elif not pt:
+                                    #actual not pt
+                                    if not pd.notna(df[category][index]):
+                                        true_n = true_n + 1
+                                    #acual pt
+                                    else:
+                                        false_n = false_n + 1
+
+                            
+                                
                                 #confusion_matrix.at['param tinkering', parts[0]] = confusion_matrix.at['param tinkering', parts[0]] + 1
-                            if od:
-                                count_output = count_output + 1
+                            #if od:
+                            #   count_output = count_output + 1
                         else:
                             print("unavailable")
                             unavailable = unavailable + 1
                     else:
                         unavailable = unavailable + 1
         
-    print(f"parameter tuning: {count}")
+    confusion_matrix.iloc[0, 0] = true_p
+    confusion_matrix.iloc[0, 1] = false_n
+    confusion_matrix.iloc[1, 0] = false_p
+    confusion_matrix.iloc[1, 1] = true_n
+    print(f"pt true p: {true_p}")
+    print(f"pt false p: {false_p}")
+    print(f"pt true n: {true_n}")
+    print(f"pt false n: {false_n}")
+    print(f"pt: {count}")
     print(f"output data: {count_output}")
         #print(f"accuracy: {count}")
     print(f"unavailable (due to no .py file): {unavailable}")
-    confusion_matrix.to_csv("./repomanager/updated_cm.csv")
+    confusion_matrix.to_csv(f"./repomanager/cm-{category}.csv")
                     
     
             
 
 if __name__ == "__main__":
-    test_data()
-    #confusion_matrix()
+    #test_data("param tinkering")
+    #confusion_matrix("param tinkering")
+
+    test_data("output data")
+    #confusion_matrix("output data")
