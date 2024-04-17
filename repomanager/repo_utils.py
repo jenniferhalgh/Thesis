@@ -20,13 +20,7 @@ def clone_repo(github_link):
         return None
 
     username, repo_name, commit, commit_hash = path_segments
-    """
-    if len(parsed_url.fragment) == 40:
-        commit_hash = parsed_url.fragment
-    else:
-        print("Commit hash not found in the link.")
-        return None
-    """
+    
     git_url = f'https://github.com/{username}/{repo_name}.git'
     repo_path = os.path.abspath(f"./Repos/{username}/{repo_name}")
     if path.exists(repo_path):

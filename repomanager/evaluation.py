@@ -178,5 +178,5 @@ if __name__ == "__main__":
     #test_data("param tinkering")
     #confusion_matrix("param tinkering")
 
-    test_data("output data")
+    test_data("param tinkering")
     #confusion_matrix("output data")

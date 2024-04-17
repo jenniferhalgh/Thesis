@@ -20,7 +20,7 @@ def commit_changes(repo_path, commit_hash=None):
         #print("hello")
         path = item.a_path
 
-        if not path.endswith('.py') and not path.endswith('.cfg'):
+        if not path.endswith('.py'):
             df = pd.DataFrame(modified_files)
             df.to_csv("pt.csv", index=False)
             print("break")
@@ -30,13 +30,13 @@ def commit_changes(repo_path, commit_hash=None):
         #print("hello")
         path = item.a_path
 
-        if not path.endswith('.py') and not path.endswith('.cfg'):
+        if not path.endswith('.py'):
             df = pd.DataFrame(modified_files)
             df.to_csv("pt.csv", index=False)
             print("break")
             return df
         
-        if path.endswith('.py') or path.endswith('.cfg'):
+        if path.endswith('.py'):
             try:
                 old_file_content = repo.git.show(f'{commit.parents[0]}:{path}')
                 current_file_content = repo.git.show(f'{commit.hexsha}:{path}')

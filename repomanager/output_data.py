@@ -125,6 +125,9 @@ class CodeChangeDetector(ast.NodeVisitor):
                         except ValueError:
                             # Handle cases where scope name is not a simple string literal
                             pass
+                        except IndexError:
+                            # Handle cases where scope name is not a simple string literal
+                            pass
         except SyntaxError as e:
             # Handle syntax errors in parsing, which might occur with incompatible Python code
             pass
@@ -252,7 +255,7 @@ if __name__ == "__main__":
     #commit_hash = "462baeeb1209e3add9ed728c4b0f9dd6dde9ba9b"
     #repo_url = "https://github.com/andrewb-ms/fast-style-transfer"
     #commit_hash = "47c993b71e2fe717e21fc3da4e8e69261832ca85"
-    repo_path, commit_hash = clone_repo("https://github.com/modanesh/facenet/commit/42be355f4c63d60e2c1b6dbc9238b0b6c38a07c8")
+    repo_path, commit_hash = clone_repo("https://github.com/CharlesShang/FastMaskRCNN/commit/afee766fef1bf1c02e533f570d6189c60a358e3f")
     df = commit_changes(repo_path, commit_hash)
     print(df)
     output_data(df)
