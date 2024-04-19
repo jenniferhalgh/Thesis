@@ -4,6 +4,10 @@ import pandas as pd
 from git import Repo
 import git
 
+"""
+This code is based on the code in https://github.com/PyRef/PyRef/tree/main.
+H. Atwi, B. Lin, N. Tsantalis, Y. Kashiwa, Y. Kamei, N. Ubayashi, G. Bavota and M. Lanza, "PyRef: Refactoring Detection in Python Projects," 2021 IEEE 21st International Working Conference on Source Code Analysis and Manipulation (SCAM), 2021, accepted.
+"""
 
 def commit_changes(repo_path, commit_hash=None):
     modified_files = []
