@@ -25,23 +25,31 @@ class CodeChangeDetector(ast.NodeVisitor):
     def detectFormatChange(self):
         diff = list(difflib.unified_diff(self.old_source.splitlines(), self.new_source.splitlines(), n=0))
         format_patterns = [
-            r'%[\(\{]?[^\)\}]*[\)\}]?[sdifge]',  # % formatting with support for mapping keys
+            r'%[\(\{]?[^\)\}]*[\)\}]?[sdifge]',  # % formatting
             r'\{[^\}]*\}',                       # .format() formatting
-            r'\{[^\}]*:[^\}]*\}',                # .format() with format specifiers
+            r'\{[^\}]*:[^\}]*\}',                # .format() with specifiers
             r'f"[^"]*"',                         # f-string
-            r"f'[^']*'"                          # f-string with single quotes
+            r"f'[^']*'"                          # f-string single quotes
         ]
+        output_keywords = ['write', 'summary.scalar']
 
         for i, line in enumerate(diff):
             if line.startswith('+') and any(re.search(pattern, line) for pattern in format_patterns):
-                # Find the similar old line if it exists
-                old_line_index = i - 1
-                while old_line_index >= 0 and not diff[old_line_index].startswith('-'):
-                    old_line_index -= 1
-                old_line = diff[old_line_index] if old_line_index >= 0 else None
-                old_content = old_line[1:].strip() if old_line else "No similar old line"
-                new_content = line[1:].strip()
-                self.changes.append(f"Detected format change in string representation:\n\tOld: {old_content}\n\tNew: {new_content}")
+                if self.relevantContext(i, diff, output_keywords):
+                    old_line_index = i - 1
+                    while old_line_index >= 0 and not diff[old_line_index].startswith('-'):
+                        old_line_index -= 1
+                    old_line = diff[old_line_index] if old_line_index >= 0 else None
+                    old_content = old_line[1:].strip() if old_line else "No corresponding old line"
+                    new_content = line[1:].strip()
+                    self.changes.append(f"Detected significant format change:\n\tOld: {old_content}\n\tNew: {new_content}")
+
+    def relevantContext(self, index, diff, keywords):
+        context_window = diff[max(0, index-5):index+6]  # Check few lines around the change
+        for line in context_window:
+            if any(keyword in line for keyword in keywords):
+                return True
+        return False
 
 
     def detectModifyingFilePaths(self):
@@ -56,20 +64,19 @@ class CodeChangeDetector(ast.NodeVisitor):
 
 
     def detectFileWritingOperation(self):
-        try:
-            old_ast = ast.parse(self.old_source) if self.old_source else None
-        except SyntaxError as error:
-            self.changes.append(f"Syntax error in old source: {error}")
-            old_ast = None
+        old_ast, old_error = self._parse_with_error_handling(self.old_source)
+        new_ast, new_error = self._parse_with_error_handling(self.new_source)
 
-        try:
-            new_ast = ast.parse(self.new_source)
-        except SyntaxError as error:
-            self.changes.append(f"Syntax error in new source: {error}")
-            new_ast = None
+    # Only report new or changed errors
+        if old_error and not new_error:
+           self.changes.append(f"Resolved syntax error in new source: {old_error}")
+        elif new_error and not old_error:
+           self.changes.append(f"New syntax error in new source: {new_error}")
+        elif old_error and new_error and old_error != new_error:
+           self.changes.append(f"Changed syntax error from: {old_error} to {new_error}")
 
         if not old_ast or not new_ast:
-            return  # Skip further analysis if we can't parse the sources
+           return  # Skip further analysis if we can't parse the sources
 
         old_operations = self._collect_file_operations(old_ast) if old_ast else set()
         new_operations = self._collect_file_operations(new_ast)
@@ -78,18 +85,25 @@ class CodeChangeDetector(ast.NodeVisitor):
         removed_operations = old_operations - new_operations
 
         for operation in added_operations:
-            self.changes.append(f"Added file writing operation: {operation}")
+           self.changes.append(f"Added file writing operation: {operation}")
         for operation in removed_operations:
-            self.changes.append(f"Removed file writing operation: {operation}")
-    
+           self.changes.append(f"Removed file writing operation: {operation}")
+
+    def _parse_with_error_handling(self, source):
+        try:
+           return ast.parse(source) if source else None, None
+        except SyntaxError as error:
+           return None, str(error)  # Return None for the AST and the error message as a string
+
     def _collect_file_operations(self, ast_node):
         operations = set()
         for node in ast.walk(ast_node):
-            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr in ['write', 'save', 'savefig', 'to_csv', 'to_json', 'save_images']:
-                operation = ast.dump(node)
-                operations.add(operation)
+           if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr in ['write', 'save', 'savefig', 'to_csv', 'to_json', 'save_images']:
+            operation = ast.dump(node)
+            operations.add(operation)
         return operations
-    
+
+
     def detect_tf_name_scope_changes(self):
         """
         Detects changes related to the introduction, removal, or modification of tf.name_scope.
@@ -106,39 +120,33 @@ class CodeChangeDetector(ast.NodeVisitor):
             self.changes.append(f"Removed TensorFlow name scope: {scope}")
 
     def _collect_tf_name_scope_usages(self, source_code):
-        """
-        Collects TensorFlow name scope usages from the source code.
-        """
-        scopes = set()
-        try:
-            parsed_ast = ast.parse(source_code)
-            for node in ast.walk(parsed_ast):
-                if isinstance(node, ast.With) and isinstance(node.items[0].context_expr, ast.Call):
-                    call_node = node.items[0].context_expr
-                    if (isinstance(call_node.func, ast.Attribute) and 
-                        call_node.func.attr == 'name_scope' and
-                        isinstance(call_node.func.value, ast.Name) and
-                        call_node.func.value.id == 'tf'):
-                        try:
-                            scope_name = ast.literal_eval(call_node.args[0])
-                            scopes.add(scope_name)
-                        except ValueError:
-                            # Handle cases where scope name is not a simple string literal
-                            pass
-                        except IndexError:
-                            # Handle cases where scope name is not a simple string literal
-                            pass
-        except SyntaxError as e:
-            # Handle syntax errors in parsing, which might occur with incompatible Python code
-            pass
-        return scopes
+    
+       scopes = set()
+       try:
+           parsed_ast = ast.parse(source_code)
+           for node in ast.walk(parsed_ast):
+               if isinstance(node, ast.With):
+                   for item in node.items:
+                       if isinstance(item.context_expr, ast.Call) and isinstance(item.context_expr.func, ast.Attribute):
+                           func = item.context_expr.func
+                           if isinstance(func.value, ast.Name) and func.value.id == 'tf' and func.attr == 'name_scope':
+                               if item.context_expr.args:  # Check if there are arguments
+                                   try:
+                                       scope_name = ast.literal_eval(item.context_expr.args[0])
+                                       scopes.add(scope_name)
+                                   except (ValueError, IndexError):
+                                    # Handle cases where the scope name is not a simple string literal or args list is empty
+                                        continue
+       except SyntaxError as e:
+        # Handle syntax errors in parsing, which might occur with incompatible Python code
+            print(f"Syntax error during parsing for name scope usage: {e}")
+       return scopes
     
     def detectPrint(self):
         
         # Patterns to identify logging or print statements
         logging_patterns = [
-            r'\bprint\(',
-            r'\blogging\.\w+\('
+            r'\bprint\('
         ]
         
         diff = list(difflib.unified_diff(self.old_source.splitlines(), self.new_source.splitlines(), n=0))
@@ -255,7 +263,7 @@ if __name__ == "__main__":
     #commit_hash = "462baeeb1209e3add9ed728c4b0f9dd6dde9ba9b"
     #repo_url = "https://github.com/andrewb-ms/fast-style-transfer"
     #commit_hash = "47c993b71e2fe717e21fc3da4e8e69261832ca85"
-    repo_path, commit_hash = clone_repo("https://github.com/CharlesShang/FastMaskRCNN/commit/afee766fef1bf1c02e533f570d6189c60a358e3f")
+    repo_path, commit_hash = clone_repo("https://github.com/thtrieu/darkflow/commit/a7cf5a97532a368e70893240c01893fcb0dee6bf")
     df = commit_changes(repo_path, commit_hash)
     print(df)
     output_data(df)
