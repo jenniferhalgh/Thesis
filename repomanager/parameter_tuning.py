@@ -4,46 +4,77 @@ import difflib
 import pandas as pd
 from repo_changes import commit_changes
 from repo_utils import clone_repo
+        
 
 class ConstantCollector(ast.NodeVisitor):
     def __init__(self, source):
         self.source = source
         self.constants = pd.DataFrame(columns=['name','value'])
+        self.functiondefs = pd.DataFrame(columns=['name','value'])
+        self.calls = []
+        self.callnodes = []
         self.names = set()
 
     def visit_Constant(self, node):
         if isinstance(node.value, (int, float)) and type(node.value) is not bool:
             parent = self._find_parent(node)
-            
-            name = ""
-            if isinstance(parent, ast.Call):
-                grandparent = self._find_parent(parent)
-                #print(grandparent)
-                if not isinstance(grandparent, ast.For):
+            grandparent = self._find_parent(parent)
+            if not isinstance(grandparent, ast.For) and not isinstance(grandparent, ast.comprehension) and not isinstance(parent, ast.For):
+                name = ""
+                if isinstance(parent, ast.Call):
+                    self.callnodes.append(parent)
+                    #grandparent = self._find_parent(parent)
+                    #print(grandparent)
+                    #if not isinstance(grandparent, ast.For):
                     if isinstance(parent.func, ast.Attribute):
-                        name = parent.func.attr
+                        #name = parent.func.attr
+                        if isinstance(parent.func.value, ast.Name):
+                                if parent.func.value.id == "tf" or parent.func.value.id == "slim":
+                                    name = parent.func.attr
+                        
                     elif isinstance(parent.func, ast.Name):
-                        #print(node.value)
+                            #print(node.value)
                         name = parent.func.id
+                            #print(name)
+                elif isinstance(parent, ast.keyword):
+                    #name = parent.arg
+                    grandparent = self._find_parent(parent)
+                    if isinstance(grandparent, ast.Call):
+                        if isinstance(grandparent.func, ast.Attribute):
+                            if isinstance(grandparent.func.value, ast.Name):
+                                if grandparent.func.value.id == "parser":
+                                    name = ""
+                                if grandparent.func.value.id == "tf" or grandparent.func.value.id == "slim":
+                                    name = parent.arg
+                    if isinstance(grandparent, ast.FunctionDef):
+                        name = grandparent.name
+                elif isinstance(parent, ast.arguments):
+                    parent = self._find_parent(parent)
+                    if isinstance(parent, ast.FunctionDef):
+                        name = parent.name
+                elif isinstance(parent, ast.Assign):
+                    #print(node.value)
+                    for child in ast.walk(parent):
+                        if isinstance(child, ast.Name):
+                            name = child.id
+                            #print(name)
+                elif isinstance(parent, ast.List):
+                    grandparent = self._find_parent(parent)
+                    
+                    if isinstance(grandparent, ast.Call):
+                        if isinstance(grandparent.func, ast.Attribute):
+                            name = grandparent.func.attr
+                        elif isinstance(grandparent.func, ast.Name):
+                            
+                            name = grandparent.func.id
                         #print(name)
-            elif isinstance(parent, ast.keyword):
-                name = parent.arg
-            elif isinstance(parent, ast.arguments):
-                parent = self._find_parent(parent)
-                if isinstance(parent, ast.FunctionDef):
-                    name = parent.name
-            elif isinstance(parent, ast.Assign):
-                #print(node.value)
-                for child in ast.walk(parent):
-                    if isinstance(child, ast.Name):
-                        name = child.id
-                        #print(name)
-                
+                    
+                    
 
-            if name:
-                new_row = {'name': name, 'value': str(node.value)}
-                self.constants.loc[len(self.constants)] = new_row
-                self.names.add(name)
+                if name:
+                    new_row = {'name': name, 'value': str(node.value)}
+                    self.constants.loc[len(self.constants)] = new_row
+                    self.names.add(name)
     
     def _find_parent(self, node):
         for n in ast.walk(self.source):
@@ -101,9 +132,17 @@ def compare(old, new):
             if line not in removed:
                 print(line)
                 param_tuning = True
-
-    return param_tuning
     
+    elif removed :
+
+        #print('additions, ignoring position')
+        for line in removed:
+            if line not in added:
+                print(line)
+                param_tuning = True
+    
+    return param_tuning
+
 
 def parameter_tuning(df):
     #df = pd.read_csv("./pt.csv")
@@ -118,19 +157,27 @@ def parameter_tuning(df):
                 ast1 = None
                 ast2 = None
                 print(f"SyntaxError occurred while parsing file {df['Path'][index]}: {e}")
+                return None
 
         if ast1 and ast2:
+
             old, new, names = get_constants(ast1, ast2)
             
+            drop_index = []
             for index2, row2 in new.iterrows():
                 if new["name"][index2] not in names:
-                    new.drop(index2)
-            #print("names")
-            #print(names)
-            #print("old")
-            #print(old)
-            #print("new")
-            #print(new)
+                    drop_index.append(index2)
+                    #new.drop(index2)
+            
+            new.drop(drop_index, inplace=True)  # Drop the row
+            """
+            print("names")
+            print(names)
+            print("old")
+            print(old)
+            print("new")
+            print(new)
+            """
             result = compare(old, new)
             if result:
                 count = count + 1
@@ -142,6 +189,7 @@ def parameter_tuning(df):
 
 
 if __name__ == "__main__":
-    repo_path, commit_hash = clone_repo("https://github.com/jakeret/tf_unet/commit/d08d48e05ec99506dca95ed2955ab10facd8e84e")
+    file = "https://github.com/atriumlts/subpixel/commit/0852d4b49d38f02cf2e699a63f6b5fec63ef7ea7"
+    repo_path, commit_hash = clone_repo(file)
     df = commit_changes(repo_path, commit_hash)
     parameter_tuning(df)

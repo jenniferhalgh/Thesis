@@ -17,42 +17,55 @@ def commit_changes(repo_path, commit_hash=None):
             commit = repo.commit(commit_hash)
         except ValueError as e:
             print(e)
-            return pd.DataFrame()
+            return pd.DataFrame(), True
     df = pd.DataFrame()
+    
+    for item in commit.diff(commit.parents[0]).iter_change_type('A'):
+        path = item.a_path
+        if not path.endswith('.py'):
+            df = pd.DataFrame(modified_files)
+            df.to_csv("pt.csv", index=False)
+            print("non-python")
+            return df, False
+    for item in commit.diff(commit.parents[0]).iter_change_type('D'):
+        path = item.a_path
+        if not path.endswith('.py'):
+            df = pd.DataFrame(modified_files)
+            df.to_csv("pt.csv", index=False)
+            print("non-python")
+            return df, False
+    
+    for item in commit.diff(commit.parents[0]).iter_change_type('M'):
+        path = item.a_path
+        if not path.endswith('.py'):
+            df = pd.DataFrame(modified_files)
+            df.to_csv("pt.csv", index=False)
+            print("non-python")
+            return df, False
+    
+    
 
     for item in commit.diff(commit.parents[0]).iter_change_type('M'):
         #print("hello")
         path = item.a_path
-
-        if not path.endswith('.py'):
-            df = pd.DataFrame(modified_files)
-            df.to_csv("pt.csv", index=False)
-            print("break")
-            return df
-
-    for item in commit.diff(commit.parents[0]).iter_change_type('M'):
-        #print("hello")
-        path = item.a_path
-
-        if not path.endswith('.py'):
-            df = pd.DataFrame(modified_files)
-            df.to_csv("pt.csv", index=False)
-            print("break")
-            return df
         
         if path.endswith('.py'):
             try:
                 old_file_content = repo.git.show(f'{commit.parents[0]}:{path}')
                 current_file_content = repo.git.show(f'{commit.hexsha}:{path}')
+                ast1 = ast.parse(old_file_content)
+                ast2 = ast.parse(current_file_content)
                 modified_files.append(
                 {"Path": path, "oldFileContent": old_file_content, "currentFileContent": current_file_content})
             except SyntaxError as e:
-                print(f"SyntaxError occurred while parsing file {path}: {e}")
+                print(f"SyntaxError occurred while parsing file {path}: {e} (pyhton 2)")
+                df = pd.DataFrame()
+                return df, False
             except git.exc.GitCommandError as ge:
                 print(ge)
             except ValueError as e:
                 df = pd.DataFrame(modified_files)
-                df.to_csv("pt.csv", index=False)
-                return df
+                
+                return df, True
     df = pd.DataFrame(modified_files)
-    return df
+    return df, True

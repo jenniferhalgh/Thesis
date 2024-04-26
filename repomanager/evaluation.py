@@ -2,8 +2,8 @@ import argparse
 from urllib.parse import urlparse
 from repo_utils import clone_repo
 from repo_changes import commit_changes
-from parameter_tuning import parameter_tuning
-from output_data import output_data
+from parameter_tuning_copy import parameter_tuning
+from output_data_copy import output_data
 import numpy as np
 #from find_change2 import param_tuning
 import pandas as pd
@@ -93,8 +93,8 @@ def test_data(category):
                 if df["sample_url"][index] not in urls:
                     urls.add(df["sample_url"][index])
                     if repo_path and commit_hash:
-                        commit = commit_changes(repo_path, commit_hash)
-                        if not commit.empty:
+                        commit, analyze = commit_changes(repo_path, commit_hash)
+                        if analyze:
                             if category == "param tinkering":
                                 pt = parameter_tuning(commit)
                                 #od = output_data(commit)
@@ -105,21 +105,23 @@ def test_data(category):
                                     if pd.notna(df[category][index]):
                                         #true positive
                                         true_p = true_p + 1 
-                                        print("TRUE")
+                                        print("True positive")
                                     #actual not pt
                                     else:
                                         #false positive
                                         false_p = false_p + 1
-                                    print(f"True: {parts[0]}")
+                                        print(f"False positive")
                                     count = count + 1
                                 #predicted not pt
                                 elif not pt:
                                     #actual not pt
                                     if not pd.notna(df[category][index]):
                                         true_n = true_n + 1
+                                        print("True negative")
                                     #acual pt
                                     else:
                                         false_n = false_n + 1
+                                        print("False negative")
                             elif category == "output data":
                                 #pt = parameter_tuning(commit)
                                 od = output_data(commit)
@@ -130,12 +132,12 @@ def test_data(category):
                                     if pd.notna(df[category][index]):
                                         #true positive
                                         true_p = true_p + 1 
-                                        print("TRUE")
+                                        print("True positive")
                                     #actual not pt
                                     else:
                                         #false positive
                                         false_p = false_p + 1
-                                    print(f"True: {parts[0]}")
+                                        print(f"False positive")
                                     count_output = count_output + 1
                                 #predicted not pt
                                 elif not pt:
@@ -144,6 +146,7 @@ def test_data(category):
                                         true_n = true_n + 1
                                     #acual pt
                                     else:
+                                        print("False negative")
                                         false_n = false_n + 1
 
                             
@@ -161,10 +164,10 @@ def test_data(category):
     confusion_matrix.iloc[0, 1] = false_n
     confusion_matrix.iloc[1, 0] = false_p
     confusion_matrix.iloc[1, 1] = true_n
-    print(f"pt true p: {true_p}")
-    print(f"pt false p: {false_p}")
-    print(f"pt true n: {true_n}")
-    print(f"pt false n: {false_n}")
+    print(f"true p: {true_p}")
+    print(f"false p: {false_p}")
+    print(f"true n: {true_n}")
+    print(f"false n: {false_n}")
     print(f"pt: {count}")
     print(f"output data: {count_output}")
         #print(f"accuracy: {count}")
@@ -178,5 +181,5 @@ if __name__ == "__main__":
     #test_data("param tinkering")
     #confusion_matrix("param tinkering")
 
-    test_data("param tinkering")
+    test_data("output data")
     #confusion_matrix("output data")
