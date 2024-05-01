@@ -64,8 +64,57 @@ def commit_changes(repo_path, commit_hash=None):
             except git.exc.GitCommandError as ge:
                 print(ge)
             except ValueError as e:
-                df = pd.DataFrame(modified_files)
-                
-                return df, True
+                break
+    
+    diff_index = commit.diff(commit.parents[0])
+
+# Iterate over the diff objects and print change types
+    for item in commit.diff(commit.parents[0]).iter_change_type('D'):
+
+        path = item.a_path
+        if path.endswith('.py'):
+            try:
+                #old_file_content = repo.git.show(f'{commit.parents[0]}:{path}')
+                current_file_content = repo.git.show(f'{commit.hexsha}:{path}')
+                old_file_content = ""
+                ast1 = ast.parse(old_file_content)
+                ast2 = ast.parse(current_file_content)
+
+                modified_files.append(
+                {"Path": path, "oldFileContent": old_file_content, "currentFileContent": current_file_content})
+            except SyntaxError as e:
+                print(f"SyntaxError occurred while parsing file {path}: {e} (pyhton 2)")
+                df = pd.DataFrame()
+                return df, False
+            except git.exc.GitCommandError as ge:
+                if 'fatal: path' in ge.stderr and 'does not exist' in ge.stderr:
+                    print(f"Error: {path} does not exist in commit {commit.hexsha}")
+
+                else:
+                    print(ge)
+            except ValueError as e:
+                break
+            
+    
+    for item in commit.diff(commit.parents[0]).iter_change_type('A'):
+
+        path = item.a_path
+
+        if path.endswith('.py'):
+            try:
+                old_file_content = repo.git.show(f'{commit.parents[0]}:{path}')
+                current_file_content = ""
+                ast1 = ast.parse(old_file_content)
+                ast2 = ast.parse(current_file_content)
+                modified_files.append(
+                {"Path": path, "oldFileContent": old_file_content, "currentFileContent": current_file_content})
+            except SyntaxError as e:
+                print(f"SyntaxError occurred while parsing file {path}: {e} (pyhton 2)")
+                df = pd.DataFrame()
+                return df, False
+            except git.exc.GitCommandError as ge:
+                print(ge)
+            except ValueError as e:
+                break
     df = pd.DataFrame(modified_files)
     return df, True

@@ -4,6 +4,8 @@ from repo_utils import clone_repo
 from repo_changes import commit_changes
 from parameter_tuning_copy import parameter_tuning
 from output_data_copy import output_data
+from training_infrastructure import training_infrastructure
+from model_structure import model_structure
 import numpy as np
 #from find_change2 import param_tuning
 import pandas as pd
@@ -149,6 +151,32 @@ def test_data(category):
                                         print("False negative")
                                         false_n = false_n + 1
 
+                            elif category == "model chng":
+                                #pt = parameter_tuning(commit)
+                                ti = model_structure(commit)
+
+                                #predicted pt
+                                if ti:
+                                    #actual pt
+                                    if pd.notna(df[category][index]):
+                                        #true positive
+                                        true_p = true_p + 1 
+                                        print("True positive")
+                                    #actual not pt
+                                    else:
+                                        #false positive
+                                        false_p = false_p + 1
+                                        print(f"False positive")
+                                    count_output = count_output + 1
+                                #predicted not pt
+                                elif not ti:
+                                    #actual not pt
+                                    if not pd.notna(df[category][index]):
+                                        true_n = true_n + 1
+                                    #acual pt
+                                    else:
+                                        print("False negative")
+                                        false_n = false_n + 1
                             
                                 
                                 #confusion_matrix.at['param tinkering', parts[0]] = confusion_matrix.at['param tinkering', parts[0]] + 1
@@ -181,5 +209,11 @@ if __name__ == "__main__":
     #test_data("param tinkering")
     #confusion_matrix("param tinkering")
 
-    test_data("output data")
+    #test_data("output data")
     #confusion_matrix("output data")
+
+    #test_data("training chng")
+    #confusion_matrix("training chng")
+
+    test_data("model chng")
+    #confusion_matrix("model chng")
