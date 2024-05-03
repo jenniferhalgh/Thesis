@@ -11,6 +11,9 @@ from repo_utils import clone_repo
 from repo_changes import commit_changes
 import pandas as pd
 
+numpy_output = ["save", "savez", "savez_compressed", "savetxt", "ndarray.tofile", "memmap"]
+scipy = []
+
 class CodeChangeDetector(ast.NodeVisitor):
     def __init__(self, source):
         self.source = source

@@ -61,6 +61,7 @@ class InputChangeDetector(ast.NodeVisitor):
 
 def input_data(df):
     changes = False
+    count = 0
     for index, row in df.iterrows():
         old_content = row["oldFileContent"]
         new_content = row["currentFileContent"]
@@ -71,7 +72,13 @@ def input_data(df):
             print(f"Changes detected in {df['Path'][index]}:")
             for change in detector.changes:
                 print(f" - {change}")
-            changes = True
+            istrue = True
+            if istrue:
+                count = count + 1
+    if count > 0:
+        changes = True
+    else:
+        changes = False
     print(f"Changes detected: {changes}")
     return changes
 

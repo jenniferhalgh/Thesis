@@ -263,6 +263,6 @@ if __name__ == "__main__":
     training_dataset.to_csv(f"./repomanager/Data/training_set.csv", index = False)
     testing_dataset.to_csv(f"./repomanager/Data/testing_set.csv", index = False)
     """
-    check_overlapping_rows()
+    #check_overlapping_rows()
 
 
