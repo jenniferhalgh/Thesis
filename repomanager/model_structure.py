@@ -5,9 +5,15 @@ import pandas as pd
 from repo_changes import commit_changes
 from repo_utils import clone_repo
 
+#taken from https://typeoverflow.com/developer/docs/tensorflow~1.15/nn 
 tf_nn_functions = ["all_candidate_sampler", "approx_max_k", "approx_min_k", "atrous_conv2d", "atrous_conv2d_transpose", "avg_pool", "avg_pool1d", "avg_pool2d", "avg_pool3d", "batch_norm_with_global_normalization", "batch_normalization", "bias_add", "collapse_repeated", "compute_accidental_hits", "compute_average_loss", "conv1d", "conv1d_transpose", "conv2d", "conv2d_transpose", "conv3d", "conv3d_transpose", "conv_transpose", "convolution", "crelu", "ctc_beam_search_decoder", "ctc_greedy_decoder", "ctc_loss", "ctc_unique_labels", "depth_to_space", "depthwise_conv2d", "depthwise_conv2d_backprop_filter", "depthwise_conv2d_backprop_input", "dilation2d", "dropout", "elu", "embedding_lookup", "embedding_lookup_sparse", "erosion2d", "fixed_unigram_candidate_sampler", "fractional_avg_pool", "fractional_max_pool", "gelu", "in_top_k", "isotonic_regression", "l2_loss", "l2_normalize", "leaky_relu", "learned_unigram_candidate_sampler", "local_response_normalization", "log_poisson_loss", "log_softmax", "lrn", "max_pool", "max_pool1d", "max_pool2d", "max_pool3d", "max_pool_with_argmax", "moments", "nce_loss", "normalize_moments", "pool", "relu", "relu6", "safe_embedding_lookup_sparse", "sampled_softmax_loss", "scale_regularization_loss", "selu", "separable_conv2d", "sigmoid", "sigmoid_cross_entropy_with_logits", "silu", "softmax", "softmax_cross_entropy_with_logits", "softplus", "softsign", "space_to_batch", "space_to_depth", "sparse_softmax_cross_entropy_with_logits", "sufficient_statistics", "swish", "tanh", "top_k", "weighted_cross_entropy_with_logits", "weighted_moments", "with_space_to_batch", "zero_fraction"]
+#taken from https://typeoverflow.com/developer/docs/tensorflow~1.15/train
 tf_train_functions = ["MonitoredTrainingSession", "NewCheckpointReader", "add_queue_runner", "assert_global_step", "basic_train_loop", "batch", "batch_join", "checkpoint_exists", "checkpoints_iterator", "cosine_decay", "cosine_decay_restarts", "create_global_step", "do_quantize_training_on_graphdef", "exponential_decay", "export_meta_graph", "generate_checkpoint_state_proto", "get_checkpoint_mtimes", "get_checkpoint_state", "get_global_step", "get_or_create_global_step", "global_step", "import_meta_graph", "init_from_checkpoint", "input_producer", "inverse_time_decay", "latest_checkpoint", "limit_epochs", "linear_cosine_decay", "list_variables", "load_checkpoint", "load_variable", "match_filenames_once", "maybe_batch", "maybe_batch_join", "maybe_shuffle_batch", "maybe_shuffle_batch_join", "natural_exp_decay", "noisy_linear_cosine_decay", "piecewise_constant", "piecewise_constant_decay", "polynomial_decay", "range_input_producer", "remove_checkpoint", "replica_device_setter", "sdca_fprint", "sdca_optimizer", "sdca_shrink_l1", "shuffle_batch", "shuffle_batch_join", "slice_input_producer", "start_queue_runners", "string_input_producer", "summary_iterator", "update_checkpoint_state", "warm_start", "write_graph"]
+#taken from https://git.ecdf.ed.ac.uk/s1886313/tensorflow/-/tree/eb10a4c494d95e7c17ddc44ef35197d08f2f6b33/tensorflow/contrib/slim#layers
 slim_layers = ["bias_add", "batch_norm", "conv2d", "conv2d_in_plane", "conv2d_transpose", "fully_connected", "avg_pool2d", "dropout", "flatten", "max_pool2d", "one_hot_encoding", "separable_conv2d", "unit_norm"]
+
+
+#https://keras.io/api/layers/convolution_layers/
 keras_layers = ["Conv1D", "Conv2D", "Conv3D", "SeparableConv1D", "SeparableConv2D", "DepthwiseConv1D", "DepthwiseConv2D", "Conv1DTranspose", "Conv2DTranspose", "Conv3DTranspose" ]
 
 class ConstantCollector(ast.NodeVisitor):
@@ -45,14 +51,8 @@ class ConstantCollector(ast.NodeVisitor):
                                     if node.func.attr in tf_nn_functions:
                                         name = f"{node.func.value.value.id}.{node.func.value.attr}.{node.func.attr}"
                                         
-                                if node.func.value.attr == "model" and node.func.value.value.id == "add":
-                                    name = f"{node.func.value.value.id}.{node.func.value.attr}.{node.func.attr}"
-                                    #print(name)
                     if isinstance(node.func.value, ast.Name):
-                        if node.func.value.id == "slim" and node.func.attr == "fully_connected":
-                                name = f"{node.func.value.id}.{node.func.attr}"
-                                #print(name)
-                        if node.func.value.id == "slim" and node.func.attr == "l2_regularizer":
+                        if node.func.value.id == "slim" and node.func.attr in slim_layers:
                                 name = f"{node.func.value.id}.{node.func.attr}"
                                 #print(name)
                        

@@ -1,3 +1,3 @@
 ,(p) - input data,(p) - not input data
-(a) - input data,0,0
-(a) - not input data,0,0
+(a) - input data,0,5
+(a) - not input data,3,120

@@ -11,8 +11,20 @@ from repo_utils import clone_repo
 from repo_changes import commit_changes
 import pandas as pd
 
+#taken from https://numpy.org/doc/stable/reference/routines.io.html
 numpy_output = ["save", "savez", "savez_compressed", "savetxt", "ndarray.tofile", "memmap"]
+
 scipy = []
+#taken from https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html
+opencv_writing = ["imwrite", "imwritemulti", "imencode"]
+
+#taken from https://scikit-learn.org/stable/modules/classes.html#module-sklearn.metrics
+sklearn_metrics = ["accuracy_score", "auc", "average_precision_score", "balanced_accuracy_score", "brier_score_loss", "class_likelihood_ratios", "classification_report", "cohen_kappa_score", "confusion_matrix", "dcg_score", "det_curve", "f1_score", "fbeta_score", "hamming_loss", "hinge_loss", "jaccard_score", "log_loss", "matthews_corrcoef", "multilabel_confusion_matrix", "ndcg_score", "precision_recall_curve", "precision_recall_fscore_support", "precision_score", "recall_score", "roc_auc_score", "roc_curve", "top_k_accuracy_score", "zero_one_loss"]
+
+#taken from https://www.tensorflow.org/versions/r1.15/api_docs/python/tf/summary
+tf_summary = ["all_v2_summary_ops", "audio", "get_summary_description", "histogram", "image", "initialize", "merge", "merge_all", "scalar", "tensor_summary", "text"]
+
+
 
 class CodeChangeDetector(ast.NodeVisitor):
     def __init__(self, source):
@@ -29,26 +41,22 @@ class CodeChangeDetector(ast.NodeVisitor):
                 name = ""
                 if isinstance(node.func, ast.Attribute):
                     #print(node.func.attr)
-                    if node.func.attr in ['write', 'savefig', 'to_csv', 'to_json', 'save_images']:
-                        name = f"{node.func.attr}"
                     if isinstance(node.func.value, ast.Attribute):
                             if isinstance(node.func.value.value, ast.Name):
                                 if node.func.value.attr == "summary" and node.func.value.value.id == "tf":
-                                    if node.func.attr in ['audio', 'histogram', 'image', 'scalar', 'tensor_summary']:
+                                    if node.func.attr in tf_summary:
                                         name = f"{node.func.value.value.id}.{node.func.value.attr}.{node.func.attr}"
                         
                     if isinstance(node.func.value, ast.Name):
-                        #if node.func.value.id == "tf" and node.func.attr == "name_scope":
-                        #    name = f"{node.func.value.id}.{node.func.attr}"
-                        if node.func.value.id == "cv2" and node.func.attr == "imwrite":
+                        if node.func.value.id == "cv2" and node.func.attr in opencv_writing:
                             name = f"{node.func.value.id}.{node.func.attr}"
-                        if node.func.value.id == "metrics":
+                        if node.func.value.id == "metrics" and node.func.attr in sklearn_metrics:
+                            name = f"{node.func.value.id}.{node.func.attr}"
+                        if node.func.value.id == "np" and node.func.attr in numpy_output:
+                            name = f"{node.func.value.id}.{node.func.attr}"
+                        if node.func.value.id == "tf" and node.func.attr == "name_scope":
                             name = f"{node.func.value.id}.{node.func.attr}"
                        
-                if isinstance(node.func, ast.Name):
-                    if node.func.id in ['write', 'savefig', 'to_csv', 'to_json', 'save_images']:
-                        #print(node.func.id)
-                        name = f"{node.func.id}"
 
                         
                 #elif isinstance(node.func, ast.Name):

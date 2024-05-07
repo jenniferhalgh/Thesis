@@ -23,9 +23,9 @@ def calculate_f1_score(tp, fp,fn):
     return f1_score
 
 if __name__ == "__main__":
-    confusion_matrix = pd.read_csv("./repomanager/cm-param tinkering.csv")
+    #confusion_matrix = pd.read_csv("./repomanager/cm-param tinkering.csv")
     #confusion_matrix = pd.read_csv("./repomanager/cm-output data.csv")
-    #confusion_matrix = pd.read_csv("./repomanager/cm-model chng.csv")
+    confusion_matrix = pd.read_csv("./repomanager/cm-model chng.csv")
     tp = confusion_matrix.iloc[0, 1]
     fn = confusion_matrix.iloc[0, 2]
     fp = confusion_matrix.iloc[1, 1]
