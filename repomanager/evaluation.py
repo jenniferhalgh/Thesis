@@ -19,11 +19,6 @@ parser.add_argument('github_link', type=str, help='GitHub link containing userna
 # Parse the arguments
 args = parser.parse_args()
 """
-# Call the clone_repo_args function with the parsed arguments
-#repo_path, commit_hash = clone_repo("https://github.com/DeepLabCut/DeepLabCut/commit/6568c2ba6facf5d90b2c39af7b0f024a40f2b15f")
-repo_path, commit_hash = clone_repo("https://github.com/google/youtube-8m/commit/53ba9e5279232cc51c5a7c8111e695c596992636")
-#repo_path, commit_hash = clone_repo("https://github.com/lancele/Semantic-Segmentation-Suite/commit/d50b5c812392614fc2bdaf269921beb1f7086f63")
-
 
 def evaluate_one(link):
     repo_path, commit_hash = clone_repo(link)
@@ -86,7 +81,7 @@ def test_data(category):
             parts = file.rsplit(".", 1)
             df = pd.read_csv(filepath)
             for index, row in df.iterrows():
-                repo_path, commit_hash = clone_repo(df["sample_url"][index])
+                repo_path, commit_hash, username, repo_name = clone_repo(df["sample_url"][index])
                 parsed_url = urlparse(df["sample_url"][index])
                 path_segments = parsed_url.path.strip('/').split('/')
                 
@@ -96,7 +91,7 @@ def test_data(category):
                 if df["sample_url"][index] not in urls:
                     urls.add(df["sample_url"][index])
                     if repo_path and commit_hash:
-                        commit, analyze = commit_changes(repo_path, commit_hash)
+                        commit, analyze = commit_changes(repo_path, commit_hash, username, repo_name)
                         if analyze:
                             if category == "param tinkering":
                                 pt = parameter_tuning(commit)
@@ -206,6 +201,33 @@ def test_data(category):
                                         print("False negative")
                                         false_n = false_n + 1
                             
+                            elif category == "training chng":
+                                #pt = parameter_tuning(commit)
+                                ti = training_infrastructure(commit)
+
+                                #predicted pt
+                                if ti:
+                                    #actual pt
+                                    if pd.notna(df[category][index]):
+                                        #true positive
+                                        true_p = true_p + 1 
+                                        print("True positive")
+                                    #actual not pt
+                                    else:
+                                        #false positive
+                                        false_p = false_p + 1
+                                        print(f"False positive")
+                                    #count_output = count_output + 1
+                                #predicted not pt
+                                elif not ti:
+                                    #actual not pt
+                                    if not pd.notna(df[category][index]):
+                                        true_n = true_n + 1
+                                    #acual pt
+                                    else:
+                                        print("False negative")
+                                        false_n = false_n + 1
+                            
                                 
                                 #confusion_matrix.at['param tinkering', parts[0]] = confusion_matrix.at['param tinkering', parts[0]] + 1
                             #if od:
@@ -243,8 +265,8 @@ if __name__ == "__main__":
     #test_data("training chng")
     #confusion_matrix("training chng")
 
-    #test_data("model chng")
+    test_data("model chng")
     #confusion_matrix("model chng")
 
-    test_data("input data")
+    #test_data("input data")
     #confusion_matrix("input data")

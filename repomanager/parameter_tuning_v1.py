@@ -60,33 +60,11 @@ def get_constants(old_tree, new_tree):
     new_collector = ConstantCollector(new_tree)
     new_collector.visit(new_tree)
     
-    """
-    for index, row in old_collector.constants.iterrows():
-        print(f'name: {row["name"]}, value: {row["value"]}')
-    
-    for index, row in new_collector.constants.iterrows():
-        print(f'name: {row["name"]}, value: {row["value"]}')
-    """
     return old_collector.constants, new_collector.constants, old_collector.names
-    #collector.visit(new_tree)
-    #return collector.old_constants, collector.new_constants
+
 
 def compare(old, new):
     param_tuning = False
-    """
-    diff = difflib.unified_diff(old["name"].tolist(), new["name"].tolist(), fromfile='file1', tofile='file2', lineterm='', n=0)
-    lines = list(diff)[2:]
-
-    added = [line[1:] for line in lines if line[0] == '+']
-    removed = [line[1:] for line in lines if line[0] == '-']
-
-    if added :
-
-        print('additions, ignoring position')
-        for line in added:
-            if line not in removed:
-                print(line)
-    """
 
     diff = difflib.unified_diff(old["value"].tolist(), new["value"].tolist(), fromfile='file1', tofile='file2', lineterm='', n=0)
     lines = list(diff)[2:]
@@ -94,9 +72,6 @@ def compare(old, new):
     removed = [line[1:] for line in lines if line[0] == '-']
 
     if added :
-            
-
-        #print('additions, ignoring position')
         for line in added:
             if line not in removed:
                 print(line)

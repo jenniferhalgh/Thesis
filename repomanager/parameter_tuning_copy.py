@@ -16,11 +16,11 @@ class ConstantCollector(ast.NodeVisitor):
         self.names = set()
     def find_Call(self, tree):
         for node in ast.walk(tree):
-                
+            name = ""
             #print("hello")
             if isinstance(node, ast.Call):
                 
-                name = ""
+                
                 if isinstance(node.func, ast.Attribute):
                     name = node.func.attr
                             
@@ -29,7 +29,8 @@ class ConstantCollector(ast.NodeVisitor):
                 #print(ast.get_source_segment(codestr, node))
                 new_row = {'name': name, 'node': str(ast.dump(node))}
                 self.calls.loc[len(self.calls)] = new_row
-            if isinstance(node, ast.Assign):
+               
+            elif isinstance(node, ast.Assign):
                     #print(node.value)
                     for child in ast.iter_child_nodes(node):
                         if isinstance(child, ast.Name):
@@ -37,6 +38,28 @@ class ConstantCollector(ast.NodeVisitor):
                             new_row = {'name': name, 'node': str(ast.dump(node))}
                             self.calls.loc[len(self.calls)] = new_row
                             #print(name)
+                            
+                        
+                        if isinstance(child, ast.Attribute):
+                            for child2 in ast.iter_child_nodes(child):
+                                if isinstance(child2, ast.Name):
+                                    name = f"{child2.id}.{child.attr}"
+                                    new_row = {'name': name, 'node': str(ast.dump(node))}
+                                    self.calls.loc[len(self.calls)] = new_row
+                                    
+                    #print(node.value)
+                    for child in ast.iter_child_nodes(node):
+                        if isinstance(child, ast.Name):
+                            name = child.id
+                            new_row = {'name': name, 'node': str(ast.dump(node))}
+                            self.calls.loc[len(self.calls)] = new_row
+                            #print(name)
+                            
+            elif isinstance(node, ast.FunctionDef):
+                name = node.name
+                new_row = {'name': name, 'node': str(ast.dump(node))}
+                self.calls.loc[len(self.calls)] = new_row
+                
 
     def visit_Constant(self, node):
         
@@ -48,11 +71,6 @@ class ConstantCollector(ast.NodeVisitor):
                 if isinstance(parent, ast.Call):
                     if isinstance(parent.func, ast.Attribute):
                         name = parent.func.attr
-                        if isinstance(parent.func.value, ast.Name):
-                                if parent.func.value.id == "parser":
-                                    name = ""
-                                #if parent.func.value.id == "tf" or parent.func.value.id == "slim":
-                                #    name = parent.func.attr
                             
                     elif isinstance(parent.func, ast.Name):
                         name = parent.func.id
@@ -63,16 +81,9 @@ class ConstantCollector(ast.NodeVisitor):
                         if isinstance(grandparent.func, ast.Attribute):
                             name = grandparent.func.attr
 
-                            if isinstance(grandparent.func.value, ast.Name):
-                                ""
-                                if grandparent.func.value.id == "parser":
-                                    name = ""
                         elif isinstance(grandparent.func, ast.Name):
                             
                             name = grandparent.func.id
-                                #if grandparent.func.value.id == "tf" or grandparent.func.value.id == "slim":
-                                #    name = parent.arg
-                                
                     if isinstance(grandparent, ast.FunctionDef):
                         name = grandparent.name
                 elif isinstance(parent, ast.arguments):
@@ -81,10 +92,15 @@ class ConstantCollector(ast.NodeVisitor):
                         name = parent.name
                 elif isinstance(parent, ast.Assign):
                     #print(node.value)
-                    for child in ast.walk(parent):
+                    for child in ast.iter_child_nodes(parent):
                         if isinstance(child, ast.Name):
                             name = child.id
                             #print(name)
+                        
+                        if isinstance(child, ast.Attribute):
+                            for child2 in ast.iter_child_nodes(child):
+                                if isinstance(child2, ast.Name):
+                                    name = f"{child2.id}.{child.attr}"
                 elif isinstance(parent, ast.List):
                     grandparent = self._find_parent(parent)
                     
@@ -119,16 +135,7 @@ def get_constants(old_tree, new_tree):
     new_collector.visit(new_tree)
     old_collector.find_Call(old_tree)
     new_collector.find_Call(new_tree)
-    """
-    for index, row in old_collector.constants.iterrows():
-        print(f'name: {row["name"]}, value: {row["value"]}')
-    
-    for index, row in new_collector.constants.iterrows():
-        print(f'name: {row["name"]}, value: {row["value"]}')
-    """
-    return old_collector.constants, new_collector.constants, old_collector.names, old_collector.calls, new_collector.calls
-    #collector.visit(new_tree)
-    #return collector.old_constants, collector.new_constants
+    return old_collector.constants, new_collector.constants, old_collector.names, new_collector.names, old_collector.calls, new_collector.calls
 
 def compare(old, new):
     param_tuning = False
@@ -175,16 +182,10 @@ def parameter_tuning(df):
 
         if ast1 and ast2:
 
-            old, new, names, oldcalls, newcalls = get_constants(ast1, ast2)
+            old, new, oldnames, newnames, oldcalls, newcalls = get_constants(ast1, ast2)
 
-            """
-            print("old")
-            print(oldcalls)
-            print("new")
-            print(newcalls)
-            """
             calls = []
-
+            
             diff = difflib.unified_diff(oldcalls["node"].tolist(), newcalls["node"].tolist(), fromfile='file1', tofile='file2', lineterm='', n=0)
             lines = list(diff)[2:]
             added = [line[1:] for line in lines if line[0] == '+']
@@ -220,37 +221,28 @@ def parameter_tuning(df):
                             calls.append(oldcalls["name"][index])
                             #calls.append(line)
             #print(calls)
-            """
-            if removed :
-                for line in removed:
-                    if line not in removed:
-                        calls.append(line)
-            """
-            """
-            if added :
-                for line in added:
-                    if line not in removed:
-                        #print(line)
-                        calls.append(line)
-            """
-            """
-            if removed :
-                for line in removed:
-                    if line not in added:
-                        #print(line)
-                        calls.append(line)
-            """
-            drop_index = []
-            for index2, row2 in new.iterrows():
-                if new["name"][index2] not in names:
-                    drop_index.append(index2)
-                
-                    #new.drop(index2)
             
-            new.drop(drop_index, inplace=True)  # Drop the row
+            """"
+            diff = difflib.unified_diff(oldcalls.tolist(), newcalls.tolist(), fromfile='file1', tofile='file2', lineterm='', n=0)
+            lines = list(diff)[2:]
+            added = [line[1:] for line in lines if line[0] == '+']
+            removed = [line[1:] for line in lines if line[0] == '-']
 
+            if added :
+                for linea in added:
+                        name = linea
+                        calls.append(name)
+            if removed :
+                for liner in removed:
+                        name = liner
+                        calls.append(name)
+
+            print(calls)
+            """
             drop_new = []
             for index2, row2 in new.iterrows():
+                #if new["name"][index2] not in oldnames:
+                #    drop_new.append(index2)
                 if new["name"][index2] in calls:
                     drop_new.append(index2)
             new.drop(drop_new, inplace=True)  # Drop the row
@@ -261,16 +253,7 @@ def parameter_tuning(df):
                     drop_old.append(index2)
 
             
-            old.drop(drop_old, inplace=True)  # Drop the row
-            
-            
-            
-            #print("names")
-            #print(names)
-            #print("old")
-            #print(old)
-            #print("new")
-            #print(new)
+            old.drop(drop_old, inplace=True)
             
             result = compare(old, new)
             if result:
@@ -284,7 +267,7 @@ def parameter_tuning(df):
 
 if __name__ == "__main__":
     #file = "https://github.com/google/youtube-8m/commit/f03b29494e2bf5066a63e4534ac3ce9243bfc782"
-    file = "https://github.com/atriumlts/subpixel/commit/0852d4b49d38f02cf2e699a63f6b5fec63ef7ea7"
+    file = "https://github.com/anadodik/tensorflow-fcn/commit/87e7148efd986e14ec0841d4b9cd30f77d9f9f56"
     #file = "https://github.com/google/youtube-8m/commit/0e526caace96d3cf6f0686757d568f9ffba998b4"
     repo_path, commit_hash = clone_repo(file)
     analyze = False

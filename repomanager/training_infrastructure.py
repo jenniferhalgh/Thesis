@@ -5,6 +5,11 @@ import pandas as pd
 from repo_changes import commit_changes
 from repo_utils import clone_repo
 
+#taken from https://typeoverflow.com/developer/docs/tensorflow~1.15/train
+tf_train_functions = ["MonitoredTrainingSession", "NewCheckpointReader", "add_queue_runner", "assert_global_step", "basic_train_loop", "batch", "batch_join", "checkpoint_exists", "checkpoints_iterator", "cosine_decay", "cosine_decay_restarts", "create_global_step", "do_quantize_training_on_graphdef", "exponential_decay", "export_meta_graph", "generate_checkpoint_state_proto", "get_checkpoint_mtimes", "get_checkpoint_state", "get_global_step", "get_or_create_global_step", "global_step", "import_meta_graph", "init_from_checkpoint", "input_producer", "inverse_time_decay", "latest_checkpoint", "limit_epochs", "linear_cosine_decay", "list_variables", "load_checkpoint", "load_variable", "match_filenames_once", "maybe_batch", "maybe_batch_join", "maybe_shuffle_batch", "maybe_shuffle_batch_join", "natural_exp_decay", "noisy_linear_cosine_decay", "piecewise_constant", "piecewise_constant_decay", "polynomial_decay", "range_input_producer", "remove_checkpoint", "replica_device_setter", "sdca_fprint", "sdca_optimizer", "sdca_shrink_l1", "shuffle_batch", "shuffle_batch_join", "slice_input_producer", "start_queue_runners", "string_input_producer", "summary_iterator", "update_checkpoint_state", "warm_start", "write_graph"]
+
+#https://docs.python.org/3/library/argparse.html
+
 class ConstantCollector(ast.NodeVisitor):
     def __init__(self, source):
         self.source = source
@@ -22,12 +27,15 @@ class ConstantCollector(ast.NodeVisitor):
                         if node.func.value.attr == "train":
                             if isinstance(node.func.value.value, ast.Name):
                                 if node.func.value.value.id == "tf":
-                                    name = f"{node.func.value.value.id}.{node.func.value.attr}.{node.func.attr}"
-                                    print(name)
+                                    if node.func.attr in tf_train_functions:
+                                        name = f"{node.func.value.value.id}.{node.func.value.attr}.{node.func.attr}"
+                                    #print(name)
+                                
                     if isinstance(node.func.value, ast.Name):
-                        if node.func.value.id == "tf" and node.func.attr == "train":
+                        if node.func.value.id == "flags":
                             name = f"{node.func.value.id}.{node.func.attr}"
-                       
+                        if node.func.value.id == "parser":
+                            name = f"{node.func.value.id}.{node.func.attr}"
 
                         
                 #elif isinstance(node.func, ast.Name):
@@ -120,7 +128,7 @@ def training_infrastructure(df):
 
 
 if __name__ == "__main__":
-    file = "https://github.com/EkaterinaPogodina/tf-faster-rcnn/commit/94879e12edefd6f7c0e006c798258f0bbe0818da#diff-86fa66d9ee46889e786fc4a2fa0ba0afe05ca08c00f81bf3d95ae3eeae426e5fR193"
+    file = "https://github.com/google/youtube-8m/commit/53ba9e5279232cc51c5a7c8111e695c596992636"
     repo_path, commit_hash = clone_repo(file)
     df, analyze = commit_changes(repo_path, commit_hash)
     training_infrastructure(df)

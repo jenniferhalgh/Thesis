@@ -26,6 +26,8 @@ if __name__ == "__main__":
     #confusion_matrix = pd.read_csv("./repomanager/cm-param tinkering.csv")
     #confusion_matrix = pd.read_csv("./repomanager/cm-output data.csv")
     confusion_matrix = pd.read_csv("./repomanager/cm-model chng.csv")
+    #confusion_matrix = pd.read_csv("./repomanager/cm-training chng.csv")
+    #confusion_matrix = pd.read_csv("./repomanager/cm-input data.csv")
     tp = confusion_matrix.iloc[0, 1]
     fn = confusion_matrix.iloc[0, 2]
     fp = confusion_matrix.iloc[1, 1]
