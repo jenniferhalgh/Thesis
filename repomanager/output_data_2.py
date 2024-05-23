@@ -14,7 +14,6 @@ import pandas as pd
 #taken from https://numpy.org/doc/stable/reference/routines.io.html
 numpy_output = ["save", "savez", "savez_compressed", "savetxt", "ndarray.tofile", "memmap"]
 
-scipy = []
 #taken from https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html
 opencv_writing = ["imwrite", "imwritemulti", "imencode"]
 
@@ -59,11 +58,6 @@ class CodeChangeDetector(ast.NodeVisitor):
                         if node.func.value.id == "plt" and node.func.attr in matplotlib:
                             name = f"{node.func.value.id}.{node.func.attr}"
                        
-
-                        
-                #elif isinstance(node.func, ast.Name):
-                #    name = node.func.id
-                        #print(ast.get_source_segment(codestr, node))
                 if name:
                     new_row = {'name': name, 'node': str(ast.dump(node))}
                     self.calls.loc[len(self.calls)] = new_row
@@ -73,10 +67,6 @@ def compare(oldcalls, newcalls):
     lines = list(diff)[2:]
     added = [line[1:] for line in lines if line[0] == '+']
     removed = [line[1:] for line in lines if line[0] == '-']
-            #print("added")
-            #print(added)
-            #print("removed")
-            #print(removed)
     if added :
         for linea in added:
             index = newcalls.loc[newcalls['node'] == linea].index[0]
@@ -101,53 +91,25 @@ def output_data(df):
         new_content = df["currentFileContent"].iloc[index]
         ast1 = ast.parse(old_content)
         ast2 = ast.parse(new_content)
-        #detector = CodeChangeDetector(old_content, new_content)
-        #detector.detect_changes()
         old_detector = CodeChangeDetector(old_content)
         new_detector = CodeChangeDetector(new_content)
         old_detector.find_Call(ast1)
         new_detector.find_Call(ast2)
         old_calls = old_detector.calls
         new_calls = new_detector.calls
-        #print(old_calls)
         istrue = compare(old_calls, new_calls)
 
         if istrue:
             count = count + 1
-        """
-        if len(detector.changes)!=0:
-            print(f"Changes detected in {df['Path'][index]}:")
-            for change in detector.changes:
-                print(f" - {change}")
-            changes = True
-        else:
-            print(f"No specific 'output data type' changes detected in {df['Path'][index]}.")
-            print("")
-        """
     if count>0:
         changes = True
     print(changes)
     return changes
 
 if __name__ == "__main__":
-    
-    #repo_url = "https://github.com/Mappy/tf-faster-rcnn"
-    #commit_hash = "51e0889fbdcd4c48f31def4c1cb05a5a4db04671"
-    #repo_url = "https://github.com/Mappy/tf-faster-rcnn"
-    #commit_hash = "29aefedc73be3d7419ba72802f347e372382db7d"
-    #repo_url = "https://github.com/thtrieu/darkflow"
-    #commit_hash = "ea141f91e59e8b8da92e2292f00bb601e0e69008"
-    #repo_url = "https://github.com/atriumlts/subpixel"
-    #commit_hash = "0852d4b49d38f02cf2e699a63f6b5fec63ef7ea7"
-    #repo_url = "https://github.com/jakeret/tf_unet"
-    #commit_hash = "9f0e79b6a38c0bbb26d674d83851e18ca0f379cc"
-    #repo_url = "https://github.com/google/youtube-8m"
-    #commit_hash = "462baeeb1209e3add9ed728c4b0f9dd6dde9ba9b"
-    #repo_url = "https://github.com/andrewb-ms/fast-style-transfer"
-    #commit_hash = "47c993b71e2fe717e21fc3da4e8e69261832ca85"
-    repo_path, commit_hash = clone_repo("https://github.com/EkaterinaPogodina/tf-faster-rcnn/commit/94879e12edefd6f7c0e006c798258f0bbe0818da#diff-86fa66d9ee46889e786fc4a2fa0ba0afe05ca08c00f81bf3d95ae3eeae426e5fR193")
-    df, analyze = commit_changes(repo_path, commit_hash)
-    #print(df)
+    file = "https://github.com/Mappy/tf-faster-rcnn/commit/29aefedc73be3d7419ba72802f347e372382db7d"
+    repo_path, commit_hash, username, repo_name = clone_repo(file)
+    df, analyze = commit_changes(repo_path, commit_hash, username, repo_name)
     if analyze : 
         output_data(df)
     

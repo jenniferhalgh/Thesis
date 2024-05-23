@@ -23,21 +23,14 @@ class ConstantCollector(ast.NodeVisitor):
                 name = ""
                 if isinstance(parent, ast.Call):
                     self.callnodes.append(parent)
-                    #grandparent = self._find_parent(parent)
-                    #print(grandparent)
-                    #if not isinstance(grandparent, ast.For):
                     if isinstance(parent.func, ast.Attribute):
-                        #name = parent.func.attr
                         if isinstance(parent.func.value, ast.Name):
                                 if parent.func.value.id == "tf" or parent.func.value.id == "slim":
                                     name = parent.func.attr
                         
                     elif isinstance(parent.func, ast.Name):
-                            #print(node.value)
                         name = parent.func.id
-                            #print(name)
                 elif isinstance(parent, ast.keyword):
-                    #name = parent.arg
                     grandparent = self._find_parent(parent)
                     if isinstance(grandparent, ast.Call):
                         if isinstance(grandparent.func, ast.Attribute):
@@ -53,11 +46,11 @@ class ConstantCollector(ast.NodeVisitor):
                     if isinstance(parent, ast.FunctionDef):
                         name = parent.name
                 elif isinstance(parent, ast.Assign):
-                    #print(node.value)
+
                     for child in ast.walk(parent):
                         if isinstance(child, ast.Name):
                             name = child.id
-                            #print(name)
+
                 elif isinstance(parent, ast.List):
                     grandparent = self._find_parent(parent)
                     
@@ -67,7 +60,7 @@ class ConstantCollector(ast.NodeVisitor):
                         elif isinstance(grandparent.func, ast.Name):
                             
                             name = grandparent.func.id
-                        #print(name)
+
                     
                     
 
@@ -90,34 +83,11 @@ def get_constants(old_tree, new_tree):
     old_collector.visit(old_tree)
     new_collector = ConstantCollector(new_tree)
     new_collector.visit(new_tree)
-    
-    """
-    for index, row in old_collector.constants.iterrows():
-        print(f'name: {row["name"]}, value: {row["value"]}')
-    
-    for index, row in new_collector.constants.iterrows():
-        print(f'name: {row["name"]}, value: {row["value"]}')
-    """
+
     return old_collector.constants, new_collector.constants, old_collector.names
-    #collector.visit(new_tree)
-    #return collector.old_constants, collector.new_constants
 
 def compare(old, new):
     param_tuning = False
-    """
-    diff = difflib.unified_diff(old["name"].tolist(), new["name"].tolist(), fromfile='file1', tofile='file2', lineterm='', n=0)
-    lines = list(diff)[2:]
-
-    added = [line[1:] for line in lines if line[0] == '+']
-    removed = [line[1:] for line in lines if line[0] == '-']
-
-    if added :
-
-        print('additions, ignoring position')
-        for line in added:
-            if line not in removed:
-                print(line)
-    """
 
     diff = difflib.unified_diff(old["value"].tolist(), new["value"].tolist(), fromfile='file1', tofile='file2', lineterm='', n=0)
     lines = list(diff)[2:]
@@ -125,17 +95,12 @@ def compare(old, new):
     removed = [line[1:] for line in lines if line[0] == '-']
 
     if added :
-            
-
-        #print('additions, ignoring position')
         for line in added:
             if line not in removed:
                 print(line)
                 param_tuning = True
     
     elif removed :
-
-        #print('additions, ignoring position')
         for line in removed:
             if line not in added:
                 print(line)
@@ -145,11 +110,8 @@ def compare(old, new):
 
 
 def parameter_tuning(df):
-    #df = pd.read_csv("./pt.csv")
-    #print(len(df))
     count = 0
     for index, row in df.iterrows():
-        #print("hello")
         try:
             ast1 = ast.parse(df["oldFileContent"].iloc[index])
             ast2 = ast.parse(df["currentFileContent"].iloc[index])
@@ -167,17 +129,8 @@ def parameter_tuning(df):
             for index2, row2 in new.iterrows():
                 if new["name"][index2] not in names:
                     drop_index.append(index2)
-                    #new.drop(index2)
             
-            new.drop(drop_index, inplace=True)  # Drop the row
-            """
-            print("names")
-            print(names)
-            print("old")
-            print(old)
-            print("new")
-            print(new)
-            """
+            new.drop(drop_index, inplace=True)
             result = compare(old, new)
             if result:
                 count = count + 1
