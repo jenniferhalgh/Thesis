@@ -24,7 +24,7 @@ sklearn_metrics = ["accuracy_score", "auc", "average_precision_score", "balanced
 #taken from https://www.tensorflow.org/versions/r1.15/api_docs/python/tf/summary
 tf_summary = ["all_v2_summary_ops", "audio", "get_summary_description", "histogram", "image", "initialize", "merge", "merge_all", "scalar", "tensor_summary", "text"]
 
-
+matplotlib = ["savefig"]
 
 class CodeChangeDetector(ast.NodeVisitor):
     def __init__(self, source):
@@ -55,6 +55,8 @@ class CodeChangeDetector(ast.NodeVisitor):
                         if node.func.value.id == "np" and node.func.attr in numpy_output:
                             name = f"{node.func.value.id}.{node.func.attr}"
                         if node.func.value.id == "tf" and node.func.attr == "name_scope":
+                            name = f"{node.func.value.id}.{node.func.attr}"
+                        if node.func.value.id == "plt" and node.func.attr in matplotlib:
                             name = f"{node.func.value.id}.{node.func.attr}"
                        
 
